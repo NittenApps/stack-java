@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  liquibase:
+    enabled: true
+    change-log: dev/nittenapps/stack/core/db.changelog-master.yaml
+
+logging:
+  level:
+    dev.nittenapps.stack: DEBUG

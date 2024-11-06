@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: core-1
+      author: sergio@nittenapps.dev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+
+      changes:
+        - createTable:
+            tableName: revinfo
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_revinfo
+                  name: id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: timestamp
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: true
+                  name: created_by
+                  type: VARCHAR(320)
+              - column:
+                  constraints:
+                    nullable: true
+                  name: updated_by
+                  type: VARCHAR(320)
+        - createTable:
+            tableName: sequence
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_sequence
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  name: prefix
+                  type: VARCHAR(50)
+              - column:
+                  name: suffix
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: current_value
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: version
+                  type: INT
+
+        - addUniqueConstraint:
+            tableName: sequence
+            columnNames: code, prefix, suffix
+            constraintName: uc_sequence_coprsu
+
+        - createSequence:
+            sequenceName: revinfo_seq
+            incrementBy: 50
+            startValue: 1
