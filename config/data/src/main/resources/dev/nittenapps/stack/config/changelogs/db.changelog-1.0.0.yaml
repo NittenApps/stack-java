@@ -1,0 +1,536 @@
+databaseChangeLog:
+  - changeSet:
+      id: config-1
+      author: sergio@nittenapps.dev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+
+      changes:
+        - createTable:
+            tableName: assigned_child_role
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: component_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: child_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: role
+                  type: VARCHAR(250)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: VARCHAR(1)
+        - createTable:
+            tableName: assigned_role
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: component_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: role
+                  type: VARCHAR(250)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: VARCHAR(1)
+        - createTable:
+            tableName: attribute
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_attribute
+                  name: catalog_id
+                  type: UUID
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_attribute
+                  name: position
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(2000)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: VARCHAR(2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: required
+                  type: BOOLEAN
+              - column:
+                  name: definition
+                  type: CLOB
+        - createTable:
+            tableName: catalog
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(500)
+              - column:
+                  name: description
+                  type: VARCHAR(2000)
+              - column:
+                  name: sort_by
+                  type: VARCHAR(50)
+              - column:
+                  name: active
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: version
+                  type: INT
+        - createTable:
+            tableName: catalog_aud
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog_aud
+                  name: rev
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog_aud
+                  name: revtype
+                  type: TINYINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog_aud
+                  name: id
+                  type: UUID
+              - column:
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  name: name
+                  type: VARCHAR(500)
+              - column:
+                  name: description
+                  type: VARCHAR(2000)
+              - column:
+                  name: sort_by
+                  type: VARCHAR(50)
+              - column:
+                  name: active
+                  type: BOOLEAN
+        - createTable:
+            tableName: catalog_value
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog_value
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: catalog_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(500)
+              - column:
+                  name: description
+                  type: VARCHAR(2000)
+              - column:
+                  name: active
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: version
+                  type: INT
+        - createTable:
+            tableName: catalog_value_aud
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog_value_aud
+                  name: rev
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog_value_aud
+                  name: revtype
+                  type: TINYINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_catalog_value_aud
+                  name: id
+                  type: UUID
+              - column:
+                  name: catalog_id
+                  type: UUID
+              - column:
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  name: name
+                  type: VARCHAR(500)
+              - column:
+                  name: description
+                  type: VARCHAR(2000)
+              - column:
+                  name: active
+                  type: BOOLEAN
+        - createTable:
+            tableName: component
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_component
+                  name: id
+                  type: UUID
+              - column:
+                  name: component_type
+                  type: VARCHAR(1)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(250)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: VARCHAR(2)
+              - column:
+                  name: description
+                  type: VARCHAR(2000)
+              - column:
+                  name: definition
+                  type: CLOB
+              - column:
+                  name: active
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: version
+                  type: INT
+        - createTable:
+            tableName: component_child
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_component_child
+                  name: component_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_component_child
+                  name: child_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: position
+                  type: INT
+              - column:
+                  name: definition
+                  type: CLOB
+              - column:
+                  constraints:
+                    nullable: false
+                  name: version
+                  type: INT
+        - createTable:
+            tableName: value_attribute
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute
+                  name: value_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: VARCHAR(2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: version
+                  type: INT
+        - createTable:
+            tableName: value_attribute_aud
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_aud
+                  name: rev
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_aud
+                  name: revtype
+                  type: TINYINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_aud
+                  name: value_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_aud
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  name: type
+                  type: VARCHAR(2)
+        - createTable:
+            tableName: value_attribute_value
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value
+                  name: value_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value
+                  name: position
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: value_attribute_value_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: value_attribute_code
+                  type: VARCHAR(50)
+              - column:
+                  name: code_value
+                  type: VARCHAR(255)
+              - column:
+                  name: string_value
+                  type: VARCHAR(255)
+              - column:
+                  name: number_value
+                  type: DOUBLE
+              - column:
+                  name: date_value
+                  type: DATETIME
+              - column:
+                  name: boolean_value
+                  type: BOOLEAN
+              - column:
+                  name: text_value
+                  type: CLOB
+        - createTable:
+            tableName: value_attribute_value_aud
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value_aud
+                  name: rev
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value_aud
+                  name: revtype
+                  type: TINYINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value_aud
+                  name: value_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value_aud
+                  name: code
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_value_attribute_value_aud
+                  name: position
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: value_attribute_value_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: value_attribute_code
+                  type: VARCHAR(50)
+              - column:
+                  name: code_value
+                  type: VARCHAR(255)
+              - column:
+                  name: string_value
+                  type: VARCHAR(255)
+              - column:
+                  name: number_value
+                  type: DOUBLE
+              - column:
+                  name: date_value
+                  type: DATETIME
+              - column:
+                  name: boolean_value
+                  type: BOOLEAN
+              - column:
+                  name: text_value
+                  type: CLOB
+
+        - addUniqueConstraint:
+            columnNames: code
+            constraintName: uc_catalog_code
+            tableName: catalog
+        - addUniqueConstraint:
+            columnNames: catalog_id, code
+            constraintName: uc_catalog_value_caidco
+            tableName: catalog_value
+        - addUniqueConstraint:
+            columnNames: code
+            constraintName: uc_component_code
+            tableName: component
+        - addForeignKeyConstraint:
+            baseColumnNames: catalog_id
+            baseTableName: catalog_value
+            constraintName: fk_catalog_value_on_catalog
+            referencedColumnNames: id
+            referencedTableName: catalog
+        - addForeignKeyConstraint:
+            baseColumnNames: child_id
+            baseTableName: component_child
+            constraintName: fk_component_child_on_child
+            referencedColumnNames: id
+            referencedTableName: component
+        - addForeignKeyConstraint:
+            baseColumnNames: component_id
+            baseTableName: component_child
+            constraintName: fk_component_child_on_component
+            referencedColumnNames: id
+            referencedTableName: component
+        - addForeignKeyConstraint:
+            baseColumnNames: component_id,child_id
+            baseTableName: assigned_child_role
+            constraintName: fk_assigned_child_role_on_component_child
+            referencedColumnNames: component_id,child_id
+            referencedTableName: component_child
+        - addForeignKeyConstraint:
+            baseColumnNames: component_id
+            baseTableName: assigned_role
+            constraintName: fk_assigned_role_on_component
+            referencedColumnNames: id
+            referencedTableName: component
+        - addForeignKeyConstraint:
+            baseColumnNames: value_id
+            baseTableName: value_attribute
+            constraintName: fk_catvalatt_on_catalog_value
+            referencedColumnNames: id
+            referencedTableName: catalog_value
