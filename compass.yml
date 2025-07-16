@@ -1,0 +1,16 @@
+name: stack-java
+id: ari:cloud:compass:6aeb0640-8a97-4ff6-ba69-f87115e438f9:component/6e29ecc4-adec-42cc-bf72-b8f4d539f852/22937a2d-999f-442f-a891-4e6f519d9a5c
+description: null
+configVersion: 1
+typeId: SERVICE
+fields:
+  tier: 4
+links:
+  - name: null
+    type: REPOSITORY
+    url: https://github.com/NittenApps/stack-java
+relationships:
+  DEPENDS_ON: []
+labels:
+  - source:github
+customFields: null
