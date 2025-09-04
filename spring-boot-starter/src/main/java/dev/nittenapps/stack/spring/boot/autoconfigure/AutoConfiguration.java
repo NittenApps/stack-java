@@ -15,37 +15,26 @@
 
 package dev.nittenapps.stack.spring.boot.autoconfigure;
 
-import dev.nittenapps.stack.data.domain.AuditorAwareImpl;
 import dev.nittenapps.stack.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @Configuration
 @ConditionalOnWebApplication
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
+@EnableJpaAuditing
 @RequiredArgsConstructor
+@Slf4j
 public class AutoConfiguration {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") private final SecurityUtils securityUtils;
-
-    @Bean
-    public AuditorAware<String> auditorAware() {
-        return new AuditorAwareImpl(securityUtils);
-    }
 
     @Configuration
     @ConditionalOnClass(dev.nittenapps.stack.activity.service.Controller.class)
     @ComponentScan(basePackages = "dev.nittenapps.stack.activity.service")
-    protected static class ActivityControllerConfiguration {}
-
-    /*@Configuration
-    @ConditionalOnClass(dev.nittenapps.stack.advice.GlobalExceptionHandler.class)
-    @ComponentScan(basePackages = "dev.nittenapps.stack.advice")
-    static class GlobalExceptionHandler {}*/
+    protected static class ActivityControllerConfiguration {
+    }
 }
