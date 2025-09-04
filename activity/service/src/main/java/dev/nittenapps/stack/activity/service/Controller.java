@@ -16,10 +16,9 @@
 package dev.nittenapps.stack.activity.service;
 
 import dev.nittenapps.stack.activity.api.Activity;
-import dev.nittenapps.stack.api.ApiBody;
-import dev.nittenapps.stack.api.ApiResponse;
-import dev.nittenapps.stack.api.ListBody;
-import dev.nittenapps.stack.api.ObjectBody;
+import dev.nittenapps.stack.api.*;
+import dev.nittenapps.stack.config.service.ActivityService;
+import dev.nittenapps.stack.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -32,7 +31,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -49,30 +48,50 @@ import java.util.UUID;
 @Tag(name = "Activity", description = "Application activities operations")
 @Slf4j
 public class Controller {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private final ActivityService activityService;
+
     private final BeanFactory beanFactory;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    private final SecurityUtils securityUtils;
+
+    @GetMapping("/{activity}/fieldGroups")
+    @Operation(summary = "Returns the list of field groups in the activity")
+    public ResponseEntity<ApiResponse<? extends ListBody<?>>> fieldGroups(@PathVariable("activity") String activity) {
+        return ResponseEntity.ok(new ApiResponse<>(new ListBody<>(activityService.getFieldGroups(activity)), null));
+    }
 
     @GetMapping("/{activity}/{method:[a-zA-Z]+}")
     @Operation(summary = "Executes a method in the activity")
-    public ResponseEntity<ApiResponse<? extends ApiBody>> get(
-            @PathVariable("activity") String activity,
-            @PathVariable("method") String method,
-            @RequestParam MultiValueMap<String, String> params,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        log.info("Get activity: {}, method: {}, params: {}, user: {}", activity, method, params, user);
-        Activity<?, ?, ?, ?> _activity = getActivity(activity);
+    public ResponseEntity<ApiResponse<? extends ApiBody>> get(@PathVariable("activity") String activity,
+                                                              @PathVariable("method") String method,
+                                                              @RequestParam MultiValueMap<String, String> params) {
+        User user = securityUtils.getUserDetails();
+        log.debug("Get activity: {}, method: {}, params: {}, user: {}", activity, method, params, user);
+        Activity<Object, Object, Object, Object> _activity = getActivity(activity);
         try {
-            Method _method = _activity.getClass().getDeclaredMethod(method, MultiValueMap.class, User.class);
+            Method _method = getMethod(_activity.getClass(), method, MultiValueMap.class, User.class);
             return ResponseEntity.ok((ApiResponse<? extends ApiBody>)_method.invoke(_activity, params, user));
         } catch (NoSuchMethodException e) {
-            throw new NoSuchElementException(e.getMessage());
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new NoSuchElementException(e.getLocalizedMessage());
+        } catch (IllegalAccessException e) {
+            throw new ApiException(500, new ApiMessage(ApiMessage.Level.ERROR, e));
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            log.error(cause.getLocalizedMessage(), cause);
+            if (cause instanceof NoSuchElementException ex) {
+                throw ex;
+            }
+            if (cause instanceof ApiException ex) {
+                throw ex;
+            }
+            throw new ApiException(500, new ApiMessage(ApiMessage.Level.ERROR, e));
         }
     }
 
     @GetMapping(value = "/{activity}")
-    @Operation(summary = "Returns the list of tasks in the activity",
-               description = "The")
+    @Operation(summary = "Returns the list of tasks in the activity")
     @Parameters({
             @Parameter(name = "activity", required = true,
                        description = "The activity code, must correspond to a bean name that implements the Activity "
@@ -89,57 +108,77 @@ public class Controller {
     })
     public ResponseEntity<ApiResponse<? extends ListBody<?>>> list(
             @PathVariable("activity") String activity,
-            @Parameter(hidden = true) @RequestParam MultiValueMap<String, String> params,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        Activity<?, ?, ?, ?> _activity = getActivity(activity);
-        return ResponseEntity.ok(_activity.getList(params, user));
+            @Parameter(hidden = true) @RequestParam MultiValueMap<String, String> params) {
+        log.debug("List activity: {}, params: {}", activity, params);
+        Activity<Object, Object, Object, Object> _activity = getActivity(activity);
+        return ResponseEntity.ok(_activity.getList(params, null));
     }
 
     @GetMapping(value = "/{activity}/{id:[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}}")
-    @Operation(summary = "Returns the list of tasks in the activity",
-               description = "The")
-    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> object(
-            @PathVariable(name = "activity") String activity,
-            @PathVariable(name = "id") String id,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        Activity<?, ?, ?, ?> _activity = getActivity(activity);
+    @Operation(summary = "Returns the specified task in the activity")
+    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> object(@PathVariable(name = "activity") String activity,
+                                                                       @PathVariable(name = "id") String id) {
+        User user = securityUtils.getUserDetails();
+        Activity<Object, Object, Object, Object> _activity = getActivity(activity);
         return ResponseEntity.ok(_activity.getObject(UUID.fromString(id), user));
     }
 
     @PostMapping("/{activity}/{method}")
-    public ResponseEntity<ApiResponse<? extends ApiBody>> post(
-            @PathVariable String activity,
-            @PathVariable String method,
-            @RequestParam MultiValueMap<String, String> params,
-            @RequestBody Map<String, Object> body,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        Activity<?, ?, ?, ?> _activity = getActivity(activity);
+    public ResponseEntity<ApiResponse<? extends ApiBody>> post(@PathVariable("activity") String activity,
+                                                               @PathVariable("method") String method,
+                                                               @RequestParam MultiValueMap<String, String> params,
+                                                               @RequestBody Map<String, Object> body) {
+        User user = securityUtils.getUserDetails();
+        Activity<Object, Object, Object, Object> _activity = getActivity(activity);
         try {
-            Method _method = _activity.getClass().getDeclaredMethod(method, MultiValueMap.class, Map.class, User.class);
+            Method _method = getMethod(_activity.getClass(), method, MultiValueMap.class, Map.class, User.class);
             return ResponseEntity.ok((ApiResponse<? extends ApiBody>)_method.invoke(_activity, params, body, user));
         } catch (NoSuchMethodException e) {
-            throw new NoSuchElementException(e.getMessage());
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new NoSuchElementException(e.getLocalizedMessage());
+        } catch (IllegalAccessException e) {
+            throw new ApiException(500, new ApiMessage(ApiMessage.Level.ERROR, e));
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            log.error(cause.getLocalizedMessage(), cause);
+            if (cause instanceof NoSuchElementException ex) {
+                throw ex;
+            }
+            if (cause instanceof ApiException ex) {
+                throw ex;
+            }
+            throw new ApiException(500, new ApiMessage(ApiMessage.Level.ERROR, e));
         }
     }
 
     @PostMapping("/{activity}")
-    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> save(
-            @PathVariable("activity") String activity,
-            @RequestParam MultiValueMap<String, String> params,
-            @RequestBody Map<String, Object> body,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        Activity<?, ?, ?, ?> _activity = getActivity(activity);
+    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> save(@PathVariable("activity") String activity,
+                                                                     @RequestBody Map<String, Object> body) {
+        User user = securityUtils.getUserDetails();
+        Activity<Object, Object, Object, Object> _activity = getActivity(activity);
         return ResponseEntity.ok(_activity.save(body, user));
     }
 
     @NonNull
-    private Activity<?, ?, ?, ?> getActivity(@NonNull String activity) throws NoSuchElementException {
+    private Activity<Object, Object, Object, Object> getActivity(@NonNull String activity) throws NoSuchElementException {
         try {
+            //noinspection unchecked
             return beanFactory.getBean(activity, Activity.class);
         } catch (BeansException e) {
             throw new NoSuchElementException(activity);
+        }
+    }
+
+    @NonNull
+    private Method getMethod(@NonNull Class<?> clazz, @NonNull String method, @Nullable Class<?>... parameterTypes)
+            throws NoSuchMethodException {
+        log.debug("Class: {}, getting method: {}, parameterTypes: {}", clazz, method, parameterTypes);
+        try {
+            return clazz.getDeclaredMethod(method, parameterTypes);
+        } catch (NoSuchMethodException e) {
+            if (clazz.getSuperclass() != null) {
+                return getMethod(clazz.getSuperclass(), method, parameterTypes);
+            }
+            throw e;
         }
     }
 }
