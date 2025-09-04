@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
-//@Import({SequenceListener.class})
 @Slf4j
 public class SequenceTest {
     @Autowired
@@ -73,17 +72,5 @@ public class SequenceTest {
     @EntityScan(basePackages = {"dev.nittenapps.stack"})
     @EnableJpaRepositories(basePackages = {"dev.nittenapps.stack"})
     static class TestConfiguration {
-        /*private EntityManagerFactory entityManagerFactory;
-
-        @Autowired
-        protected void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
-            this.entityManagerFactory = entityManagerFactory;
-        }
-
-        @Autowired
-        protected void registerInterceptor(SequenceInterceptor interceptor) {
-            log.debug("Registering interceptor {}", interceptor);
-            entityManagerFactory.unwrap(SessionFactory.class).withOptions().interceptor(interceptor);
-        }*/
     }
 }

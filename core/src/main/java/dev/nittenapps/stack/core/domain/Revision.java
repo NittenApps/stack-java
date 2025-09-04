@@ -15,6 +15,7 @@
 
 package dev.nittenapps.stack.core.domain;
 
+import dev.nittenapps.stack.core.support.RevisionListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -31,7 +32,7 @@ import java.io.Serial;
 
 @Entity
 @Table(name = "revinfo")
-@RevisionEntity
+@RevisionEntity(RevisionListener.class)
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class Revision extends DefaultRevisionEntity {

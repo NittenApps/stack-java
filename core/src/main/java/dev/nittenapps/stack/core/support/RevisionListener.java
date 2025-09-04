@@ -10,28 +10,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * Copyright (c) 2024. NittenApps
+ * Copyright (c) 2025. NittenApps
  */
 
-package dev.nittenapps.stack.data.domain;
+package dev.nittenapps.stack.core.support;
 
+import dev.nittenapps.stack.core.domain.Revision;
 import dev.nittenapps.stack.util.SecurityUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.AuditorAware;
-import org.springframework.lang.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
-public class AuditorAwareImpl implements AuditorAware<String> {
+@Component
+@RequiredArgsConstructor
+public class RevisionListener implements org.hibernate.envers.RevisionListener {
     private final SecurityUtils securityUtils;
 
-    public AuditorAwareImpl(SecurityUtils securityUtils) {
-        this.securityUtils = securityUtils;
-    }
-
     @Override
-    @NonNull
-    public Optional<String> getCurrentAuditor() {
-        return Optional.of(StringUtils.defaultIfBlank(securityUtils.getUsername(), "SYSTEM"));
+    public void newRevision(Object revision) {
+        Revision rev = (Revision)revision;
+        rev.setUpdatedBy(securityUtils.getUsername());
     }
 }

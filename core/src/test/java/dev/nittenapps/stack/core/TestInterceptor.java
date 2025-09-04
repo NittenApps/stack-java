@@ -15,12 +15,11 @@
 
 package dev.nittenapps.stack.core;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
-import org.springframework.stereotype.Component;
+import org.springframework.lang.NonNull;
 
 import java.util.Map;
 

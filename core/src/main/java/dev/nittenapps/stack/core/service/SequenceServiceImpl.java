@@ -40,6 +40,13 @@ public class SequenceServiceImpl implements SequenceService {
     }
 
     @Override
+    public int getCurrentValue(String code, String prefix, String suffix) {
+        Sequence sequence = getSequence(entityManagerFactory.unwrap(SessionFactoryImpl.class).openStatelessSession(),
+                code, prefix, suffix);
+        return sequence.getCurrentValue();
+    }
+
+    @Override
     public int getNextValue(String code, String prefix, String suffix, int increment) {
         StatelessSession session = entityManagerFactory.unwrap(SessionFactoryImpl.class).openStatelessSession();
         session.beginTransaction();
