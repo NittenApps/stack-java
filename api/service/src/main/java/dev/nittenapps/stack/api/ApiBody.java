@@ -15,5 +15,11 @@
 
 package dev.nittenapps.stack.api;
 
+/**
+ * Marker interface for API response bodies.
+ * <p>
+ * Used to define the structure of objects that can be included in API responses. Classes implementing this interface
+ * can represent various types of response payloads, such as objects, lists, or error details.
+ */
 public interface ApiBody {
 }

@@ -21,7 +21,17 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data @NoArgsConstructor @AllArgsConstructor
+/**
+ * Represents a paginated list structure to be used as a response body in API responses.
+ * <p>
+ * The class encapsulates the data items in the list, the current page number, and the total number of items available.
+ * It provides constructors to initialize the instance with a list of items, automatically setting the page to 1 and
+ * calculating the total number of items if only the list is provided.
+ *
+ * @param <T> the type of items contained within the list
+ */
+@Data
+@NoArgsConstructor @AllArgsConstructor
 public class ListBody<T> implements ApiBody {
     private List<T> items;
 
@@ -29,6 +39,12 @@ public class ListBody<T> implements ApiBody {
 
     private long total;
 
+    /**
+     * Constructs a new ListBody instance with the provided list of items. Initializes the current page to 1 and
+     * calculates the total number of items in the provided list. If the list is null, the total is set to 0.
+     *
+     * @param items the list of items to be contained within this ListBody instance
+     */
     public ListBody(List<T> items) {
         this.items = items;
         this.page = 1;

@@ -17,6 +17,25 @@ package dev.nittenapps.stack.data.domain;
 
 import java.util.Map;
 
+/**
+ * Represents an abstract base class for entities that manage a collection of attributes.
+ * This class is generic and requires a type parameter that must extend {@code AbstractAttribute}.
+ * <p>
+ * It provides functionality for:
+ * - Storing and retrieving attributes via a map where the key is a string identifier, and the value is the attribute instance.
+ * <p>
+ * Subclasses should implement the abstract method to retrieve the map of attributes.
+ * <p>
+ * Key Features:
+ * - Inherits from {@code AbstractSimpleId}, gaining UUID-based identification and versioning support.
+ * - Designed to be extended by domain-specific entities that require attribute handling.
+ * <p>
+ * Generic Constraints:
+ * - {@code T} must extend {@code AbstractAttribute}, ensuring that the attributes managed by this class comply with the attribute
+ *   framework defined by {@code AbstractAttribute}.
+ *
+ * @param <T> The type of attribute that this entity supports, extending {@code AbstractAttribute}.
+ */
 public abstract class WithAttributes<T extends AbstractAttribute> extends AbstractSimpleId {
     public abstract Map<String, T> getAttributes();
 }

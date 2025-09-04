@@ -15,8 +15,40 @@
 
 package dev.nittenapps.stack.data.service;
 
+/**
+ * SequenceService is an interface that provides methods for managing sequence values with a combination of code,
+ * prefix, and suffix. It allows fetching the current value, generating the next sequence value with an optional
+ * increment, and setting a specific sequence value.
+ */
 public interface SequenceService {
+    /**
+     * Retrieves the current sequence value based on the given code, prefix, and suffix.
+     *
+     * @param code The unique identifier representing the sequence. Must not be null or empty.
+     * @param prefix The prefix to be used as part of the sequence value. Can be null or empty.
+     * @param suffix The suffix to be appended to the sequence value. Can be null or empty.
+     * @return The current integer value of the sequence associated with the given code, prefix, and suffix.
+     */
+    int getCurrentValue(String code, String prefix, String suffix);
+
+    /**
+     * Generates and retrieves the next sequence value based on the provided code, prefix, suffix, and increment value.
+     *
+     * @param code The unique identifier representing the sequence. Must not be null or empty.
+     * @param prefix The prefix to be used as part of the sequence value. Can be null or empty.
+     * @param suffix The suffix to be appended to the sequence value. Can be null or empty.
+     * @param increment The value to increment the current sequence by. Must be a positive integer.
+     * @return The next integer value of the sequence after applying the specified increment.
+     */
     int getNextValue(String code, String prefix, String suffix, int increment);
 
+    /**
+     * Sets the sequence value for the given combination of code, prefix, and suffix.
+     *
+     * @param code The unique identifier representing the sequence. Must not be null or empty.
+     * @param prefix The prefix to be used as part of the sequence value. Can be null or empty.
+     * @param suffix The suffix to be appended to the sequence value. Can be null or empty.
+     * @param value The integer value to set for the sequence. Must be a non-negative integer.
+     */
     void setValue(String code, String prefix, String suffix, int value);
 }

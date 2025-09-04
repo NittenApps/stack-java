@@ -18,8 +18,36 @@ package dev.nittenapps.stack.data.dto;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * WithAttributesDto is an interface that extends the {@link SimpleIdDto} interface, representing a Data Transfer Object
+ * (DTO) with a unique identifier and a collection of attributes. It is typically used for entities that need to
+ * dynamically manage a set of attribute key-value pairs.
+ * <p>
+ * The attributes are represented as a map, where the keys are strings and the values are lists of
+ * {@link AttributeValueDto} objects. This design allows for multiple values to be associated with a single attribute
+ * key.
+ * <p>
+ * It provides methods to retrieve and set the attribute map, enabling flexibility in handling attribute-based
+ * entities.
+ */
 public interface WithAttributesDto extends SimpleIdDto {
+    /**
+     * Retrieves the attributes associated with the implementing entity. The attributes are represented as a map where
+     * the keys are strings representing attribute names and the values are lists of {@link AttributeValueDto} objects,
+     * allowing for multiple values per attribute.
+     *
+     * @return a map containing the attributes of the entity, with keys as attribute names (strings) and values as lists
+     * of {@link AttributeValueDto} instances
+     */
     Map<String, List<AttributeValueDto>> getAttributes();
 
+    /**
+     * Sets the attributes for the implementing entity. The attributes are represented as a map where keys are strings
+     * representing attribute names, and values are lists of {@link AttributeValueDto} objects. This design allows for
+     * associating multiple values with a single attribute key.
+     *
+     * @param attributes a list containing the attributes to be set, with keys as attribute names (strings) and values
+     *                   as lists of {@link AttributeValueDto} instances
+     */
     void setAttributes(Map<String, List<AttributeValueDto>> attributes);
 }

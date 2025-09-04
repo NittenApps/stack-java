@@ -20,18 +20,44 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation to define sequence generation for numeric or alphanumeric fields in an entity.
+ * <p>
+ * This annotation is used to indicate that the annotated field should have its value generated based on a sequence
+ * mechanism. It provides options for configuring the sequence generation such as the sequence code, prefix, suffix,
+ * size, increment, and whether to override existing values.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Sequence {
+    /**
+     * Specifies the sequence code.
+     */
     String code();
 
+    /**
+     * Specifies a prefix for the generated sequence value.
+     */
     String prefix() default "";
 
+    /**
+     * Specifies a suffix to be appended to the generated sequence value.
+     */
     String suffix() default "";
 
+    /**
+     * Specifies the size of the generated sequence value, left padding with zeroes.
+     */
     int size() default 6;
 
+    /**
+     * Specifies the increment step for the sequence generation. This value determines the amount by which the sequence
+     * is increased each time a new value is generated.
+     */
     int increment() default 1;
 
+    /**
+     * Specifies whether existing values should be overridden when generating a new value for the annotated field.
+     */
     boolean overrideExisting() default false;
 }

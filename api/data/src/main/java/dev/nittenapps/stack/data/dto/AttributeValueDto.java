@@ -22,14 +22,28 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 /**
- * DTO for {@link dev.nittenapps.stack.data.domain.AttributeValue}
+ * Represents the value of an attribute which can hold various types of data. This object is used in contexts where
+ * attributes and their respective values are dynamically handled.
+ * <p>
+ * The class supports multiple data types for attribute values including:
+ * - String
+ * - Numeric
+ * - Boolean
+ * - Date/Time
+ * - Text
+ * - Catalog references
+ * <p>
+ * It also includes an inner static class, CatalogValue, which represents catalog-based information with a code and
+ * name.
  */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public class AttributeValueDto implements Serializable {
     @Serial private static final long serialVersionUID = -3668217203922914188L;
 
+    @EqualsAndHashCode.Include private Integer position;
     private String codeValue;
     private String stringValue;
     private Double numberValue;
@@ -39,6 +53,7 @@ public class AttributeValueDto implements Serializable {
     private CatalogValue catalogValue;
 
     @NoArgsConstructor @AllArgsConstructor
+    @ToString
     public static class CatalogValue {
         public String code;
         public String name;

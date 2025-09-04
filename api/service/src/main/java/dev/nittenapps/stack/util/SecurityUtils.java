@@ -15,6 +15,34 @@
 
 package dev.nittenapps.stack.util;
 
+import org.springframework.security.core.userdetails.User;
+
+import java.util.Map;
+
+/**
+ * Interface that defines utility methods for working with security-related information in the current authentication
+ * context.
+ */
 public interface SecurityUtils {
+    /**
+     * Retrieves a map of user claims associated with the currently authenticated user.
+     *
+     * @return a map containing the claims of the authenticated user, where the keys are claim names and  the values are
+     *         the corresponding claim values
+     */
+    Map<String, Object> getUserClaims();
+
+    /**
+     * Retrieves the details of the currently authenticated user.
+     *
+     * @return a User object representing the details of the authenticated user
+     */
+    User getUserDetails();
+
+    /**
+     * Retrieves the username of the currently authenticated user.
+     *
+     * @return the username of the authenticated user
+     */
     String getUsername();
 }

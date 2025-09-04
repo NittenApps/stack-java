@@ -19,6 +19,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents a generic API response body wrapper for a single object.
+ * <p>
+ * This class provides a container for wrapping an object within an API response. It implements the {@link ApiBody}
+ * interface, ensuring compatibility with standardized API response structures. The generic type parameter <T> allows
+ * flexibility in defining the type of object encapsulated by this class.
+ *
+ * @param <T> the type of the object that this body contains
+ */
 @Data @AllArgsConstructor @NoArgsConstructor
 public class ObjectBody<T> implements ApiBody {
     private T object;

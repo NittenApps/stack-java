@@ -17,8 +17,14 @@ package dev.nittenapps.stack.data.dto;
 
 import java.util.UUID;
 
-public interface SimpleIdDto {
-    UUID getId();
-
-    void setId(UUID id);
+/**
+ * SimpleIdDto is a marker interface for Data Transfer Objects (DTOs) that extend {@link BaseDto} with a unique
+ * identifier of type {@link UUID}. This interface is designed to provide a consistent definition of entities
+ * identifiable by a UUID within the application.
+ * <p>
+ * Implementations of this interface can add additional properties and behaviors while maintaining the required
+ * structure of having a UUID identifier. It serves as a base for DTOs used in a variety of contexts, such as
+ * components, lists, and attribute-based entities.
+ */
+public interface SimpleIdDto extends BaseDto<UUID> {
 }

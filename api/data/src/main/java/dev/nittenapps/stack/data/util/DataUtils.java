@@ -15,6 +15,9 @@
 
 package dev.nittenapps.stack.data.util;
 
+import dev.nittenapps.stack.data.domain.AbstractAttribute;
+import dev.nittenapps.stack.data.domain.AttributeValue;
+import dev.nittenapps.stack.data.domain.WithAttributes;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +27,26 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class providing methods for building pageable and sortable queries, as well as accessing specific attribute
+ * values in a structured data context. This class is intended for use in applications requiring flexible data querying
+ * or retrieval of attributes by code.
+ * <p>
+ * This is a final utility class and cannot be instantiated.
+ */
 public class DataUtils {
+    /**
+     * Builds a {@code Pageable} object based on the provided query parameters for pagination.
+     *
+     * @param params a {@code MultiValueMap} containing query parameters for pagination, including "page" and
+     *               "pageSize". If "page" is missing or invalid, it defaults to 0. If "pageSize" is missing or invalid,
+     *               it defaults to 0.
+     * @return a {@code Pageable} object representing the specified page and page size. If "pageSize" is not greater
+     *         than 0, returns an unpaged {@code Pageable}.
+     */
     @NonNull
     public static Pageable buildPageable(@NonNull MultiValueMap<String, String> params) {
         int page = Integer.parseInt(StringUtils.defaultIfBlank(params.getFirst("page"), "0"));
@@ -40,6 +60,15 @@ public class DataUtils {
         return pageable;
     }
 
+    /**
+     * Builds a {@code Sort} object based on the specified query parameters.
+     *
+     * @param params a {@code MultiValueMap} containing query parameters, including a "sort" key. The value of "sort"
+     *               should be a comma-separated list of field names optionally followed by "desc" to indicate
+     *               descending order.
+     * @return a {@code Sort} object representing the sorting criteria specified in the "sort" parameter. If the
+     *         parameter is empty or invalid, returns {@code Sort.unsorted()}.
+     */
     @NonNull
     public static Sort buildSort(@NonNull MultiValueMap<String, String> params) {
         String sortString = params.getFirst("sort");
@@ -56,6 +85,22 @@ public class DataUtils {
         }
 
         return sort;
+    }
+
+    /**
+     * Retrieves the value of a specific attribute code from a given {@code WithAttributes} instance. The method
+     * attempts to fetch the attribute by its code, extract its values, and return the first value, if available.
+     *
+     * @param withAttributes the instance containing a collection of attributes
+     * @param code the code of the attribute whose value is to be retrieved
+     * @return an {@code Optional} containing the first value of the attribute with the specified code, or an empty
+     *         {@code Optional} if no value is found
+     */
+    public static Optional<AttributeValue> getValue(@NonNull WithAttributes<?> withAttributes, @NonNull String code) {
+        return Optional.ofNullable(withAttributes.getAttributes())
+                .map(attributes -> attributes.get(code))
+                .map(AbstractAttribute::getValues)
+                .flatMap(values -> values.stream().findFirst());
     }
 
     private DataUtils() {

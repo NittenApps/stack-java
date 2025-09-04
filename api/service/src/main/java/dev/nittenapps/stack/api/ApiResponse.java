@@ -21,7 +21,14 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
-@Data @NoArgsConstructor @AllArgsConstructor
+/**
+ * Represents a standardized structure for API responses. The `ApiResponse` class encapsulates metadata about the
+ * response, including whether the operation was successful, a timestamp, the response body, and any related messages.
+ *
+ * @param <T> the type of the response body, which must implement the {@link ApiBody} interface
+ */
+@Data
+@NoArgsConstructor @AllArgsConstructor
 public class ApiResponse<T extends ApiBody> {
     private boolean success;
 
@@ -31,6 +38,13 @@ public class ApiResponse<T extends ApiBody> {
 
     private ApiMessage[] messages;
 
+    /**
+     * Constructs an ApiResponse instance with a given response body and associated messages. Automatically sets the
+     * success status to true and generates a timestamp for the response.
+     *
+     * @param body the response body of type T implementing the ApiBody interface
+     * @param messages an array of ApiMessage objects providing details about the response or errors
+     */
     public ApiResponse(T body, ApiMessage[] messages) {
         this(true, new Timestamp(System.currentTimeMillis()), body, messages);
     }

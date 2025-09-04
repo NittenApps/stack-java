@@ -24,14 +24,50 @@ import lombok.*;
 
 import java.io.Serializable;
 
+/**
+ * AbstractVersioned represents a base class for entities that include versioning support. This class is designed to
+ * provide optimistic locking capabilities using a version field annotated with {@code @Version}. It is designed to be
+ * extended by other entities and provides default behavior for common operations.
+ * <p>
+ * Annotations:
+ * - {@code @MappedSuperclass}: Marks this class as a superclass that other entity types can inherit from.
+ * - {@code @Getter @Setter}: Automatically generates getter and setter methods for fields.
+ * - {@code @NoArgsConstructor @AllArgsConstructor}: Generates constructors for no-arg and all-arg variants.
+ * - {@code @ToString}: Generates a string representation of this class, including inherited fields.
+ *
+ * <p>
+ * Fields:
+ * - {@code version}: An {@code Integer} field used for optimistic locking. It ensures that changes to an entity are
+ * based on the latest state in the persistence context. Annotated with {@code @Version}.
+ * <p>
+ * Methods:
+ * - {@code isNew()}: Determines whether the entity is new (unsaved) by checking if the version field is null. This is
+ * marked as {@code @Transient} to exclude it from persistence and is ignored during serialization with
+ * {@code @JsonIgnore}.
+ *
+ * @param <ID> the type of the identifier, which must implement {@code Serializable}
+ */
 @MappedSuperclass
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @ToString
 public abstract class AbstractVersioned<ID extends Serializable> implements Versioned<ID> {
+    /**
+     * Represents the version of the entity for optimistic locking purposes. It is annotated with {@code @Version} to
+     * signify its role in managing concurrent modifications to the entity, ensuring that updates occur only if the
+     * version matches the expected value.
+     * <p>
+     * This field is mapped to the database column named "version" and is marked as non-nullable using the
+     * {@code @Column} annotation.
+     */
     @Version @Column(name = "version", nullable = false)
     protected Integer version;
 
+    /**
+     * Determines whether the entity is new (i.e., not yet persisted) by checking if the version field is null.
+     *
+     * @return true if the entity is new (unsaved), false otherwise.
+     */
     @Override
     @Transient
     @JsonIgnore
