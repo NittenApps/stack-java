@@ -23,8 +23,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 @Getter @Setter
+@ToString(callSuper = true)
 public class KeycloakJwt extends JwtAuthenticationToken {
     @Serial private static final long serialVersionUID = -851442547430174234L;
 
@@ -39,5 +41,6 @@ public class KeycloakJwt extends JwtAuthenticationToken {
         @Serial private static final long serialVersionUID = -730342037299382458L;
 
         private String name;
+        Map<String, Object> claims;
     }
 }

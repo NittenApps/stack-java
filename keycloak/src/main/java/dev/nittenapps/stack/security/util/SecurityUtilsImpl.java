@@ -17,21 +17,45 @@ package dev.nittenapps.stack.security.util;
 
 import dev.nittenapps.stack.security.jwt.KeycloakJwt;
 import dev.nittenapps.stack.util.SecurityUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class SecurityUtilsImpl implements SecurityUtils {
     @Override
+    public Map<String, Object> getUserClaims() {
+        return ((KeycloakJwt.Details)SecurityContextHolder.getContext().getAuthentication().getDetails()).getClaims();
+    }
+
+    @Override
+    public User getUserDetails() {
+        return Optional.ofNullable((KeycloakJwt)SecurityContextHolder.getContext().getAuthentication())
+                .map(jwt -> new User(getUsername(jwt), "[PROTECTED]", jwt.getAuthorities()))
+                .orElse(null);
+    }
+
+    @Override
     public String getUsername() {
-        var keycloakJwt = (KeycloakJwt)SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken) {
+            return getUsername((KeycloakJwt)authentication);
+        }
+            return "[ANONYMOUS]";
+    }
+
+    private String getUsername(KeycloakJwt keycloakJwt) {
         return Optional.ofNullable(keycloakJwt)
                 .map(JwtAuthenticationToken::getTokenAttributes)
-                .map(attributes -> (String)attributes.get("preferred_username"))
+                .map(attributes -> MapUtils.getString(attributes, StandardClaimNames.PREFERRED_USERNAME))
                 .filter(StringUtils::isNotBlank)
                 .orElse(null);
     }

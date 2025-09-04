@@ -22,28 +22,46 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+@SuppressWarnings("unused")
 public class KeycloakJwtConverter implements Converter<Jwt, KeycloakJwt> {
+    private final Set<String> userClaims;
+
+    public KeycloakJwtConverter(Set<String> userClaims) {
+        this.userClaims = userClaims;
+    }
+
     @Override
     public KeycloakJwt convert(@NonNull Jwt source) {
         log.trace("Converting {} to {}", source, KeycloakJwt.class);
         log.trace("Claims: {}", source.getClaims());
         Collection<GrantedAuthority> grantedAuthorities = extractAuthorities(source);
         var keycloakJwt = new KeycloakJwt(source, grantedAuthorities);
-        keycloakJwt.setDetails(new KeycloakJwt.Details(source.getClaimAsString("name")));
+        keycloakJwt.setDetails(new KeycloakJwt.Details(source.getClaimAsString("name"), extractClaims(source)));
+        log.trace("KeycloakJwt: {}", keycloakJwt);
         return keycloakJwt;
+    }
+
+    @NonNull
+    private Map<String, Object> extractClaims(@NonNull Jwt source) {
+        log.trace("Extracting user claims {}", userClaims);
+        Map<String, Object> claims = new HashMap<>();
+        source.getClaims().forEach((k, v) -> {
+            if (userClaims.contains(k)) {
+                claims.put(k, v);
+            }
+        });
+        return claims;
     }
 
     private Collection<GrantedAuthority> extractAuthorities(@NonNull Jwt source) {
         return Optional.ofNullable(source.getClaimAsMap("realm_access"))
                 .map(realmAccess -> realmAccess.get("roles"))
                 .filter(roles -> roles instanceof Collection<?>)
-                .map(roles -> ((Collection<?>)roles).stream().map(role -> new SimpleGrantedAuthority("role_" + role))
+                .map(roles -> ((Collection<?>)roles).stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .map(authority -> (GrantedAuthority)authority)
                         .collect(Collectors.toSet()))
                 .orElse(Collections.emptySet());
