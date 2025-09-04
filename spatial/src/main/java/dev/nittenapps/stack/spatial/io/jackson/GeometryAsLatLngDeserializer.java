@@ -19,11 +19,39 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.NonNull;
 import org.locationtech.jts.geom.*;
+import org.springframework.lang.NonNull;
 
 import java.io.IOException;
 
+/**
+ * A custom deserializer for converting JSON objects with latitude and longitude fields into JTS {@link Geometry}
+ * objects, specifically {@link Point}. This deserializer expects the JSON input to contain "lat" and "lng" fields
+ * corresponding to the latitude and longitude, respectively.
+ * <p>
+ * The deserialization process uses a {@link GeometryFactory}, initialized with a {@link PrecisionModel} and a spatial
+ * reference identifier (SRID) set to {@code 4326}, to create the {@link Point}.
+ * <p>
+ * The JSON format is expected to adhere to the following structure:
+ * <code><pre>
+ * {
+ *   "lng": <i>&lt;longitude as double&gt;</i>,
+ *   "lat": <i>&lt;latitude as double&gt;</i>
+ * }
+ * </pre></code>
+ * <p>
+ * Throws:
+ * <ul>
+ *   <li>{@link IOException}: If there is an error reading or parsing the JSON input.</li>
+ * </ul>
+ * <p>
+ * Usage scenarios:
+ * <ul>
+ *   <li>Suitable for applications requiring conversion of JSON spatial data with longitude and latitude fields into JTS
+ *   geometry objects.</li>
+ *   <li>Commonly used in geospatial applications where JSON serves as the data exchange format.</li>
+ * </ul>
+ */
 @SuppressWarnings("unused")
 public class GeometryAsLatLngDeserializer extends JsonDeserializer<Geometry> {
     private static final int DEFAULT_SRID = 4326;

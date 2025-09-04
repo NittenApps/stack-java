@@ -15,16 +15,20 @@
 
 package dev.nittenapps.stack.spatial.util;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.referencing.datum.DefaultEllipsoid;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
+import org.springframework.lang.NonNull;
 
 import java.awt.geom.Point2D;
 
+/**
+ * Utility class providing methods for operations with geometries. This class includes methods for parsing Well-Known
+ * Text (WKT) strings into geometry objects, creating geographic points, and creating geometric circles.
+ */
 @Slf4j
 @SuppressWarnings("unused")
 public class GeometryUtils {
@@ -36,11 +40,26 @@ public class GeometryUtils {
     private GeometryUtils() {
     }
 
+    /**
+     * Converts a Well-Known Text (WKT) string into a Geometry object with a default spatial reference ID (SRID).
+     *
+     * @param wkt A non-null string in Well-Known Text (WKT) format representing a geometry.
+     * @return A Geometry object parsed from the WKT string with the default SRID applied.
+     * @throws ParseException If the WKT string cannot be parsed into a valid Geometry object.
+     */
     @NonNull
     public static Geometry wktToGeometry(@NonNull String wkt) throws ParseException {
         return wktToGeometry(wkt, DEFAULT_SRID);
     }
 
+    /**
+     * Converts a Well-Known Text (WKT) string into a Geometry object with the specified spatial reference ID (SRID).
+     *
+     * @param wkt  A non-null string in Well-Known Text (WKT) format representing a geometry.
+     * @param srid An integer specifying the Spatial Reference System Identifier (SRID) to associate with the geometry.
+     * @return A Geometry object parsed from the WKT string and assigned the specified SRID.
+     * @throws ParseException If the WKT string cannot be parsed into a valid Geometry object.
+     */
     @NonNull
     public static Geometry wktToGeometry(@NonNull String wkt, int srid) throws ParseException {
         try {
@@ -54,10 +73,27 @@ public class GeometryUtils {
         }
     }
 
+    /**
+     * Creates a Point geometry object representing a geographic location from the given latitude and longitude.
+     *
+     * @param lat The latitude of the geographic location.
+     * @param lng The longitude of the geographic location.
+     * @return A Point object representing the geographic location constructed with the specified latitude and longitude.
+     */
     public static Point createGeoPoint(double lat, double lng) {
         return GEOMETRY_FACTORY.createPoint(new Coordinate(lng, lat));
     }
 
+    /**
+     * Creates a circular polygon geometry representing a geographic area around the given latitude and longitude,
+     * with the specified radius in meters. The circle is approximated by a polygon with a dynamic number of sides
+     * based on the radius to maintain accuracy and minimize computation cost.
+     *
+     * @param lat    The center's latitude of the circular area.
+     * @param lng    The center's longitude of the circular area.
+     * @param radius The radius of the circular area in meters.
+     * @return A Geometry object representing the circular area as a polygon.
+     */
     public static Geometry createGeoCircle(double lat, double lng, double radius) {
         GeodeticCalculator calculator = new GeodeticCalculator(DefaultEllipsoid.WGS84);
         calculator.setStartingGeographicPoint(lng, lat);
