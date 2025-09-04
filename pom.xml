@@ -38,14 +38,6 @@
     <url>${git.url}/${git.repo}</url>
   </scm>
 
-  <distributionManagement>
-    <site>
-      <id>NittenAppsDocs</id>
-      <name>NittenApps Docs Site</name>
-      <url>dav:${project.url}</url>
-    </site>
-  </distributionManagement>
-
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
@@ -55,6 +47,32 @@
   </properties>
 
   <repositories>
+    <repository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+    <repository>
+      <id>NittenApps Snapshots</id>
+      <name>NittenApps Apache Maven Repository</name>
+      <url>https://repo.nittenapps.dev/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>NittenApps Releases</id>
+      <name>NittenApps Apache Maven Repository</name>
+      <url>https://repo.nittenapps.dev/releases</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
     <repository>
       <id>osgeo</id>
       <name>OSGeo Release Repository</name>
@@ -72,6 +90,7 @@
     <module>parent</module>
     <module>bom</module>
     <module>api</module>
+    <module>files</module>
     <module>core</module>
     <module>config</module>
     <module>activity</module>
