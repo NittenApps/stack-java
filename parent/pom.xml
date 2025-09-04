@@ -27,19 +27,20 @@
 
   <artifactId>stack-parent</artifactId>
   <packaging>pom</packaging>
-
   <name>Stack :: Parent</name>
   <description>Stack Parent POM</description>
 
   <properties>
-    <commons-collections4.version>4.4</commons-collections4.version>
-    <commons-lang3.version>3.17.0</commons-lang3.version>
-    <flowable.version>7.0.1</flowable.version>
-    <geotools.version>32.0</geotools.version>
+    <commons-collections4.version>4.5.0</commons-collections4.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
+    <flowable.version>7.2.0</flowable.version>
+    <geotools.version>33.2</geotools.version>
+    <hypersistence-utils.version>3.9.11</hypersistence-utils.version>
     <java-uuid-generator.version>5.1.0</java-uuid-generator.version>
     <jts.version>1.20.0</jts.version>
-    <mapstruct.version>1.5.5.Final</mapstruct.version>
-    <spring-boot.version>3.3.5</spring-boot.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
+    <spring-boot.version>3.5.5</spring-boot.version>
+    <swagger.version>2.2.36</swagger.version>
   </properties>
 
   <dependencyManagement>
@@ -83,6 +84,11 @@
         <version>${geotools.version}</version>
       </dependency>
       <dependency>
+        <groupId>io.hypersistence</groupId>
+        <artifactId>hypersistence-utils-hibernate-63</artifactId>
+        <version>${hypersistence-utils.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.fasterxml.uuid</groupId>
         <artifactId>java-uuid-generator</artifactId>
         <version>${java-uuid-generator.version}</version>
@@ -96,6 +102,11 @@
         <groupId>org.mapstruct</groupId>
         <artifactId>mapstruct</artifactId>
         <version>${mapstruct.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
