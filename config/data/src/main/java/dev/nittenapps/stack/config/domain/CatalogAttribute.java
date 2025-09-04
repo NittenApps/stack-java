@@ -19,6 +19,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Lob;
 import lombok.*;
+import org.hibernate.envers.NotAudited;
 
 import java.util.Objects;
 
@@ -27,6 +28,10 @@ import java.util.Objects;
 @NoArgsConstructor @AllArgsConstructor
 @ToString(doNotUseGetters = true)
 public class CatalogAttribute {
+    @Column(name = "position")
+    @NotAudited
+    private Integer position;
+
     @Column(name = "code", nullable = false, length = 50)
     private String code;
 

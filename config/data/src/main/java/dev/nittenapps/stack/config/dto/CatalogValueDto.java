@@ -16,11 +16,14 @@
 package dev.nittenapps.stack.config.dto;
 
 import dev.nittenapps.stack.data.dto.AttributeValueDto;
+import dev.nittenapps.stack.data.dto.ListDto;
+import dev.nittenapps.stack.data.dto.ObjectDto;
 import dev.nittenapps.stack.data.dto.WithAttributesDto;
 import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +35,7 @@ import java.util.UUID;
 @NoArgsConstructor @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
-public class CatalogValueDto implements WithAttributesDto, Serializable {
+public class CatalogValueDto implements ListDto<UUID>, ObjectDto<UUID>, WithAttributesDto, Serializable {
     @Serial private static final long serialVersionUID = -1043995119259936203L;
 
     private UUID id;
@@ -41,9 +44,15 @@ public class CatalogValueDto implements WithAttributesDto, Serializable {
     private String name;
     private String description;
     private Boolean active;
+    private String updatedBy;
+    private ZonedDateTime updatedOn;
     private Map<String, List<AttributeValueDto>> attributes;
 
     public CatalogValueDto(UUID id, String code, String name) {
-        this(id, null, code, name, null, null, null);
+        this(id, null, code, name, null, null, null, null, null);
+    }
+
+    public CatalogValueDto(UUID id, String catalogCode, String code, String name) {
+        this(id, catalogCode, code, name, null, null, null, null, null);
     }
 }

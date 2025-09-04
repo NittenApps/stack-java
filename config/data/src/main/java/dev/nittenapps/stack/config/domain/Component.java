@@ -15,12 +15,10 @@
 
 package dev.nittenapps.stack.config.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.nittenapps.stack.data.domain.AbstractSimpleId;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -32,6 +30,7 @@ import java.util.Set;
 @DiscriminatorColumn(name = "component_type", length = 1)
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@ToString(callSuper = true)
 public class Component extends AbstractSimpleId {
     @NaturalId
     @Column(name = "code", nullable = false, updatable = false, length = 50)
@@ -56,10 +55,12 @@ public class Component extends AbstractSimpleId {
     @ElementCollection
     @CollectionTable(name = "assigned_role", joinColumns = @JoinColumn(name = "component_id"))
     @SQLRestriction("type = 'V'")
+    @JsonIgnore @ToString.Exclude
     protected Set<AssignedRole> viewerRoles;
 
     @ElementCollection
     @CollectionTable(name = "assigned_role", joinColumns = @JoinColumn(name = "component_id"))
     @SQLRestriction("type = 'E'")
+    @JsonIgnore @ToString.Exclude
     protected Set<AssignedRole> editorRoles;
 }

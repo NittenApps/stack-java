@@ -15,16 +15,36 @@
 
 package dev.nittenapps.stack.config.service;
 
+import dev.nittenapps.stack.config.domain.Catalog;
 import dev.nittenapps.stack.config.domain.CatalogValue;
+import dev.nittenapps.stack.config.dto.CatalogListDto;
 import dev.nittenapps.stack.config.dto.CatalogValueDto;
 import org.springframework.lang.NonNull;
+import org.springframework.util.MultiValueMap;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ConfigService {
+    Optional<Catalog> getCatalog(@NonNull String code);
+
+    List<CatalogListDto> getCatalogs();
+
+    Optional<CatalogValue> getCatalogValue(@NonNull UUID id);
+
     Optional<CatalogValue> getCatalogValue(@NonNull String catalogCode, @NonNull String code);
 
     Optional<CatalogValue> getCatalogValue(@NonNull String catalogCode, @NonNull String code, boolean ignoreActive);
 
+    Optional<CatalogValue> getCatalogValueByName(@NonNull String catalogCode, @NonNull String name,
+                                                 String jpqlRestrictions);
+
+    List<CatalogValueDto> getCatalogValues(@NonNull String catalogCode, MultiValueMap<String, String> filters);
+
+    Catalog saveCatalog(@NonNull Catalog catalog);
+
     CatalogValue saveCatalogValue(@NonNull CatalogValueDto catalogValue);
+
+    CatalogValue saveCatalogValue(@NonNull CatalogValue catalogValue);
 }

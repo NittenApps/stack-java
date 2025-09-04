@@ -393,16 +393,6 @@ databaseChangeLog:
                   name: position
                   type: INT
               - column:
-                  constraints:
-                    nullable: false
-                  name: value_attribute_value_id
-                  type: UUID
-              - column:
-                  constraints:
-                    nullable: false
-                  name: value_attribute_code
-                  type: VARCHAR(50)
-              - column:
                   name: code_value
                   type: VARCHAR(255)
               - column:
@@ -457,16 +447,6 @@ databaseChangeLog:
                     primaryKeyName: pk_value_attribute_value_aud
                   name: position
                   type: INT
-              - column:
-                  constraints:
-                    nullable: false
-                  name: value_attribute_value_id
-                  type: UUID
-              - column:
-                  constraints:
-                    nullable: false
-                  name: value_attribute_code
-                  type: VARCHAR(50)
               - column:
                   name: code_value
                   type: VARCHAR(255)

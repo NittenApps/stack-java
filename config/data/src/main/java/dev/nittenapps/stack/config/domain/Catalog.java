@@ -17,12 +17,10 @@ package dev.nittenapps.stack.config.domain;
 
 import dev.nittenapps.stack.data.domain.AbstractSimpleId;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +31,7 @@ import java.util.Objects;
 @Audited
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@ToString(callSuper = true)
 public class Catalog extends AbstractSimpleId {
     @NaturalId
     @Column(name = "code", nullable = false, updatable = false, length = 50)
@@ -52,8 +51,9 @@ public class Catalog extends AbstractSimpleId {
 
     @ElementCollection
     @CollectionTable(name = "attribute", joinColumns = @JoinColumn(name = "catalog_id"))
-    @OrderColumn(name = "position")
-    private List<CatalogAttribute> catalogAttributes = new ArrayList<>();
+    @OrderBy("position")
+    @NotAudited
+    private List<CatalogAttribute> attributes = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

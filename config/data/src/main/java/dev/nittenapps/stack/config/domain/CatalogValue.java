@@ -21,8 +21,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +32,7 @@ import java.util.Objects;
 @Audited
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@ToString(callSuper = true)
 public class CatalogValue extends WithAttributes<CatalogValueAttribute> {
     @NaturalId
     @ManyToOne(optional = false)
@@ -51,9 +52,8 @@ public class CatalogValue extends WithAttributes<CatalogValueAttribute> {
     @Column(name = "active")
     private boolean active;
 
-    @OneToMany(mappedBy = "catalogValue", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "catalogValue", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @MapKey(name = "id.code")
-    @NotAudited
     @JsonIgnore @ToString.Exclude
     private final Map<String, CatalogValueAttribute> attributes = new HashMap<>();
 

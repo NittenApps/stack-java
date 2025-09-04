@@ -26,13 +26,25 @@
   </parent>
 
   <artifactId>stack-config-service</artifactId>
-
   <name>Stack :: Config :: Service</name>
 
   <dependencies>
     <dependency>
       <groupId>dev.nittenapps.stack</groupId>
       <artifactId>stack-config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.nittenapps.stack</groupId>
+      <artifactId>stack-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.hypersistence</groupId>
+      <artifactId>hypersistence-utils-hibernate-63</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-annotations</artifactId>
     </dependency>
   </dependencies>
 </project>

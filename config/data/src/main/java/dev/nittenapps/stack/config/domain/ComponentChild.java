@@ -28,17 +28,17 @@ import java.util.Set;
 @Table(name = "component_child")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@ToString(callSuper = true, doNotUseGetters = true)
+@ToString(callSuper = true)
 public class ComponentChild extends AbstractVersioned<ComponentChildId> {
     @EmbeddedId
     private ComponentChildId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("componentId")
     @JsonIgnore @ToString.Exclude
     private Component component;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("childId")
     @JsonIgnore @ToString.Exclude
     private Component child;
@@ -72,7 +72,7 @@ public class ComponentChild extends AbstractVersioned<ComponentChildId> {
         }
 
         ComponentChild that = (ComponentChild)o;
-        return Objects.equals(id, that.id);
+        return Objects.equals(child.getId(), that.child.getId());
     }
 
     @Override

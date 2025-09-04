@@ -44,12 +44,13 @@ public abstract class CatalogValueMapper
         this.entityManager = entityManager;
     }
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    public abstract CatalogValue partialUpdate(CatalogValueDto catalogValueDto,
-                                               @MappingTarget CatalogValue catalogValue);
-
     @Mapping(target = "catalogCode", source = "catalog.code")
+    @Mapping(target = "attributes", ignore = true)
     public abstract CatalogValueDto toDto(CatalogValue catalogValue);
+
+    @Named("fullDto")
+    @Mapping(target = "catalogCode", source = "catalog.code")
+    public abstract CatalogValueDto toFullDto(CatalogValue catalogValue);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "catalog", ignore = true)
@@ -59,6 +60,10 @@ public abstract class CatalogValueMapper
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "attributes", ignore = true)
     public abstract CatalogValue toEntity(CatalogValueDto catalogValueDto);
+
+    @Mapping(target = "id", ignore = true)
+    @Named("full")
+    public abstract CatalogValue toFullEntity(CatalogValueDto catalogValueDto);
 
     @ObjectFactory
     protected CatalogValue resolve(CatalogValueDto catalogValueDto) {

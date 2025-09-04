@@ -17,10 +17,7 @@ package dev.nittenapps.stack.config.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -30,6 +27,7 @@ import java.util.UUID;
 @Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@ToString
 public class ComponentChildId implements Serializable {
     @Serial private static final long serialVersionUID = -7845454784827292268L;
 

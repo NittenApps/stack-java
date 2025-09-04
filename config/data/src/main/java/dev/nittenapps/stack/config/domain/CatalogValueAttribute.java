@@ -21,6 +21,7 @@ import dev.nittenapps.stack.data.domain.AttributeId;
 import dev.nittenapps.stack.data.domain.AttributeValue;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLOrder;
 import org.hibernate.envers.Audited;
 
 import java.util.ArrayList;
@@ -28,29 +29,29 @@ import java.util.List;
 
 @Entity
 @Table(name = "value_attribute")
+@Audited
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@ToString(callSuper = true, doNotUseGetters = true)
+@ToString(callSuper = true)
 public class CatalogValueAttribute extends AbstractAttribute {
     @EmbeddedId
     @AttributeOverride(name = "parentId", column = @Column(name = "value_id"))
     private AttributeId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("parentId")
     @JoinColumn(name = "value_id", referencedColumnName = "id")
     @JsonIgnore @ToString.Exclude
     private CatalogValue catalogValue;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     @CollectionTable(name = "value_attribute_value",
                      joinColumns = {
                              @JoinColumn(name = "value_id", referencedColumnName = "value_id"),
                              @JoinColumn(name = "code", referencedColumnName = "code")
                      })
-    @OrderColumn(name = "position")
-    @Audited
-    private final List<AttributeValue> values = new ArrayList<>();
+    @SQLOrder("position")
+    private List<AttributeValue> values = new ArrayList<>();
 
     public CatalogValueAttribute(AttributeId id, CatalogValue catalogValue, String type) {
         super(type);

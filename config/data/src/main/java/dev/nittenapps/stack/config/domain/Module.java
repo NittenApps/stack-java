@@ -15,21 +15,22 @@
 
 package dev.nittenapps.stack.config.domain;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderColumn;
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @DiscriminatorValue("M")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
 public class Module extends Component {
-    @OneToMany(mappedBy = "component")
-    @OrderColumn(name = "position")
+    @OneToMany(mappedBy = "component", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @OrderBy("position")
     @ToString.Exclude
-    private List<ComponentChild> activities;
+    private final Set<ComponentChild> activities = new LinkedHashSet<>();
 }

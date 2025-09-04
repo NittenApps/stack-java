@@ -28,11 +28,12 @@
 
   <artifactId>stack-config</artifactId>
   <packaging>pom</packaging>
-
   <name>Stack :: Config</name>
+
   <modules>
     <module>data</module>
     <module>api</module>
     <module>service</module>
+    <module>activity</module>
   </modules>
 </project>

@@ -23,6 +23,5 @@ import lombok.*;
 @DiscriminatorValue("F")
 @Getter @Setter
 @NoArgsConstructor
-@ToString(callSuper = true, doNotUseGetters = true)
 public class Field extends Component {
 }
