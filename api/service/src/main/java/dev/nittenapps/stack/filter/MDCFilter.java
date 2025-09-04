@@ -19,12 +19,13 @@ import dev.nittenapps.stack.util.SecurityUtils;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.MDC;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * MDCFilter is a servlet filter that intercepts HTTP requests and enriches the Mapped Diagnostic Context (MDC)
@@ -76,14 +77,20 @@ public class MDCFilter implements Filter {
             if (request instanceof HttpServletRequest httpRequest) {
                 MDC.put("REQUEST_URI", httpRequest.getRequestURI());
                 MDC.put("REQUEST_METHOD", httpRequest.getMethod());
-                MDC.put("REQUEST_BODY", httpRequest.getReader().lines()
-                        .collect(Collectors.joining(System.lineSeparator())));
+                MDC.put("REQUEST_USER", securityUtils.getUsername());
+                if (Strings.CI.equalsAny(httpRequest.getMethod(), "POST", "PUT")) {
+                    ContentCachingRequestWrapper cachingRequest = new ContentCachingRequestWrapper(httpRequest);
+                    MDC.put("REQUEST_BODY", cachingRequest.getContentAsString());
+
+                    chain.doFilter(cachingRequest, response);
+                } else {
+                    chain.doFilter(httpRequest, response);
+                }
             } else {
                 MDC.put("REQUEST_ID", request.getRequestId());
-            }
-            MDC.put("REQUEST_USER", securityUtils.getUsername());
 
-            chain.doFilter(request, response);
+                chain.doFilter(request, response);
+            }
         } finally {
             MDC.clear();
         }
