@@ -54,7 +54,7 @@ public class FieldGroups extends AbstractActivity<FieldGroup, UUID, FieldGroupLi
     }
 
     @Override
-    public ApiResponse<ObjectBody<FieldGroupDto>> getObject(@NonNull UUID id, User user) {
+    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
         return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 

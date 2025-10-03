@@ -51,7 +51,7 @@ public class CatalogValues extends AbstractActivity<Catalog, UUID, CatalogListDt
     }
 
     @Override
-    public ApiResponse<ObjectBody<CatalogDto>> getObject(@NonNull UUID id, User user) {
+    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
         return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 

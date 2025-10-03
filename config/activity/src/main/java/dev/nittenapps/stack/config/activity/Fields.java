@@ -40,7 +40,7 @@ public class Fields extends AbstractActivity<Field, UUID, FieldListDto, FieldDto
     }
 
     @Override
-    public ApiResponse<ObjectBody<FieldDto>> getObject(@NonNull UUID id, User user) {
+    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
         return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 

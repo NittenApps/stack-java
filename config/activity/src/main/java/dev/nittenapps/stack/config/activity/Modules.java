@@ -51,7 +51,7 @@ public class Modules extends AbstractActivity<Module, UUID, ModuleListDto, Modul
     }
 
     @Override
-    public ApiResponse<ObjectBody<ModuleDto>> getObject(@NonNull UUID id, User user) {
+    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
         return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 

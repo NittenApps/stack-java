@@ -57,7 +57,7 @@ public interface Activity<E, ID, L, O> {
      * @param user the user requesting the retrieval, used for context or authorization checks
      * @return an {@code ApiResponse} containing an {@code ObjectBody} that encapsulates the retrieved object
      */
-    default ApiResponse<ObjectBody<O>> getObject(@NonNull ID id, User user) {
+    default ApiResponse<ObjectBody<?>> getObject(@NonNull ID id, User user) {
         throw new NotImplementedException();
     }
 

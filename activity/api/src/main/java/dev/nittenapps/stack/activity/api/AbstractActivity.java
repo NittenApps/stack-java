@@ -24,6 +24,7 @@ import dev.nittenapps.stack.data.util.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
@@ -117,7 +118,7 @@ public abstract class AbstractActivity<E, ID, L, O> implements Activity<E, ID, L
      * @return an {@code ApiResponse} containing a {@code ListBody} that wraps the object
      */
     @Override
-    public ApiResponse<ObjectBody<O>> getObject(@NonNull ID id, User user) {
+    public ApiResponse<ObjectBody<?>> getObject(@NonNull ID id, User user) {
         return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 
@@ -137,7 +138,7 @@ public abstract class AbstractActivity<E, ID, L, O> implements Activity<E, ID, L
 
         Map<String, Object> filters = new HashMap<>();
         params.entrySet().stream()
-                .filter(entry -> !StringUtils.equalsAny(entry.getKey(), "sort", "page", "pageSize"))
+                .filter(entry -> !Strings.CS.equalsAny(entry.getKey(), "sort", "page", "pageSize"))
                 .forEach(entry -> {
                     List<String> values = entry.getValue().stream().filter(StringUtils::isNotBlank).toList();
                     if (values.size() > 1) {

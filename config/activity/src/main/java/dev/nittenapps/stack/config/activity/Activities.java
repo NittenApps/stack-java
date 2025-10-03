@@ -51,7 +51,7 @@ public class Activities extends AbstractActivity<Activity, UUID, ActivityListDto
     }
 
     @Override
-    public ApiResponse<ObjectBody<ActivityDto>> getObject(@NonNull UUID id, User user) {
+    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
         return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 
