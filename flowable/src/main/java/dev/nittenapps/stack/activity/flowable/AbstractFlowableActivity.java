@@ -18,7 +18,6 @@ package dev.nittenapps.stack.activity.flowable;
 import dev.nittenapps.stack.activity.api.AbstractActivity;
 import dev.nittenapps.stack.api.ApiResponse;
 import dev.nittenapps.stack.api.ListBody;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RuntimeService;
@@ -26,6 +25,7 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.util.MultiValueMap;
 
@@ -33,7 +33,6 @@ import java.util.List;
 
 @Slf4j
 public class AbstractFlowableActivity<E, ID, L, O> extends AbstractActivity<E, ID, L, O> {
-
     protected ProcessEngine processEngine;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")

@@ -130,8 +130,8 @@ public abstract class AbstractAttributesMapper<T extends WithAttributes<A>, A ex
     }
 
     /**
-     * Prepares the mapping by performing necessary initialization using the provided DTO. Specifically, it assigns the
-     * unique identifier from the DTO to the `parentId` field of this mapper.
+     * Prepares the mapping by performing the necessary initialization using the provided DTO. Specifically, it assigns
+     * the unique identifier from the DTO to the `parentId` field of this mapper.
      *
      * @param dto the data transfer object from which the mapping initialization data is derived. If null, the method
      *            exits without performing any action.
