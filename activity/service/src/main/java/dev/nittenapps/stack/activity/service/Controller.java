@@ -114,13 +114,17 @@ public class Controller {
         return ResponseEntity.ok(_activity.getList(params, null));
     }
 
-    @GetMapping(value = "/{activity}/{id:[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}}")
-    @Operation(summary = "Returns the specified task in the activity")
-    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> object(@PathVariable(name = "activity") String activity,
-                                                                       @PathVariable(name = "id") String id) {
+    @GetMapping(value = "/{activity}/{id:(?:[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}|[A-Z0-9_-]+)}")
+    @Operation(summary = "Returns the specified task in the activity, by id")
+    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> objectById(
+            @PathVariable(name = "activity") String activity,
+            @PathVariable(name = "id") String id) {
         User user = securityUtils.getUserDetails();
         Activity<Object, Object, Object, Object> _activity = getActivity(activity);
-        return ResponseEntity.ok(_activity.getObject(UUID.fromString(id), user));
+        if (id.matches("[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}")) {
+            return ResponseEntity.ok(_activity.getObject(UUID.fromString(id), user));
+        }
+        return ResponseEntity.ok(_activity.getObject(id, user));
     }
 
     @PostMapping("/{activity}/{method}")
@@ -159,7 +163,8 @@ public class Controller {
     }
 
     @NonNull
-    private Activity<Object, Object, Object, Object> getActivity(@NonNull String activity) throws NoSuchElementException {
+    private Activity<Object, Object, Object, Object> getActivity(@NonNull String activity)
+            throws NoSuchElementException {
         try {
             //noinspection unchecked
             return beanFactory.getBean(activity, Activity.class);
