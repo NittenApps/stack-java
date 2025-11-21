@@ -16,21 +16,19 @@
 package dev.nittenapps.stack.config.service;
 
 import dev.nittenapps.stack.config.domain.Catalog;
+import dev.nittenapps.stack.config.domain.CatalogAttribute;
 import dev.nittenapps.stack.config.dto.CatalogDto;
 import dev.nittenapps.stack.config.dto.CatalogListDto;
 import dev.nittenapps.stack.config.mapper.CatalogMapper;
 import dev.nittenapps.stack.data.service.AbstractDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,6 +37,20 @@ import java.util.UUID;
 public class CatalogServiceImpl extends AbstractDataService<Catalog, UUID, CatalogListDto, CatalogDto>
         implements CatalogService {
     private final CatalogMapper catalogMapper;
+
+    @Override
+    public CatalogDto findByCode(@NonNull String code) {
+        String jpql = """
+                SELECT c
+                FROM Catalog c LEFT JOIN FETCH c.attributes
+                WHERE c.code = :code
+                """;
+        //noinspection unchecked
+        Query<Catalog> query = entityManager.createQuery(jpql)
+                .setParameter("code", code)
+                .unwrap(Query.class);
+        return catalogMapper.toDto(query.getSingleResult());
+    }
 
     @Override
     public CatalogDto getObject(@NonNull UUID id) {
@@ -60,8 +72,9 @@ public class CatalogServiceImpl extends AbstractDataService<Catalog, UUID, Catal
         log.debug("Saving catalog: {}", catalogDto);
         Catalog catalog = catalogMapper.toEntity(catalogDto);
         if (catalog.getAttributes() != null) {
-            for (int i = 0; i < catalog.getAttributes().size(); i++) {
-                catalog.getAttributes().get(i).setPosition(i);
+            int i = 0;
+            for (CatalogAttribute attribute : catalog.getAttributes()) {
+                attribute.setPosition(i++);
             }
         }
 
@@ -73,31 +86,14 @@ public class CatalogServiceImpl extends AbstractDataService<Catalog, UUID, Catal
     }
 
     @Override
-    protected void bindParams(Query<?> query, @NonNull Map<String, Object> filters) {
-        Optional.ofNullable(MapUtils.getString(filters, "code"))
-                .filter(StringUtils::isNotBlank)
-                .ifPresent(code -> query.setParameter("code", code));
-        Optional.ofNullable(MapUtils.getString(filters, "name"))
-                .filter(StringUtils::isNotBlank)
-                .ifPresent(name -> query.setParameter("name", name.toLowerCase()));
-    }
-
-    @Override
     protected String buildJpqlRestrictions(@NonNull Map<String, Object> filters) {
-        StringBuilder restrictions = new StringBuilder();
-        Optional.ofNullable(MapUtils.getString(filters, "code"))
-                .filter(StringUtils::isNotBlank)
-                .ifPresent(code -> restrictions.append(" WHERE e.code LIKE :code"));
-        Optional.ofNullable(MapUtils.getString(filters, "name"))
-                .filter(StringUtils::isNotBlank)
-                .ifPresent(name -> {
-                    if (restrictions.isEmpty()) {
-                        restrictions.append(" WHERE ");
-                    } else {
-                        restrictions.append(" AND ");
-                    }
-                    restrictions.append("LOWER(e.name) LIKE :name");
-                });
+        StringBuilder restrictions = new StringBuilder(super.buildJpqlRestrictions(filters));
+        if (restrictions.isEmpty()) {
+            restrictions.append(" WHERE ");
+        } else {
+            restrictions.append(" AND ");
+        }
+        restrictions.append("e.code <> '__PARAMETERS__'");
         return restrictions.toString();
     }
 
@@ -107,5 +103,21 @@ public class CatalogServiceImpl extends AbstractDataService<Catalog, UUID, Catal
                 SELECT new dev.nittenapps.stack.config.dto.CatalogListDto(e.id,e.code,e.name,e.description,e.active)
                 FROM Catalog e
                 """;
+    }
+
+    @Override
+    protected String getFilterField(@NonNull String field) {
+        if ("name".equals(field)) {
+            return "LOWER(e.name)";
+        }
+        return super.getFilterField(field);
+    }
+
+    @Override
+    protected String getFilterOperator(@NonNull String field) {
+        return switch (field) {
+            case "code", "name" -> "LIKE";
+            default -> super.getFilterOperator(field);
+        };
     }
 }

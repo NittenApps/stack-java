@@ -46,6 +46,21 @@ public class CatalogValueServiceImpl extends AbstractDataService<CatalogValue, U
     private final CatalogValueMapper catalogValueMapper;
 
     @Override
+    public CatalogValueDto findByCatalogCodeAndCode(@NonNull String catalogCode, @NonNull String code) {
+        String jpql = """
+                SELECT cv
+                FROM CatalogValue cv LEFT JOIN FETCH cv.attributes cvas LEFT JOIN FETCH cvas.values
+                WHERE cv.catalog.code = :catalogCode AND cv.code = :code
+                """;
+        //noinspection unchecked
+        Query<CatalogValue> query = entityManager.createQuery(jpql)
+                .setParameter("catalogCode", catalogCode)
+                .setParameter("code", code)
+                .unwrap(Query.class);
+        return catalogValueMapper.toFullDto(query.getSingleResult());
+    }
+
+    @Override
     public List<CatalogValueDto> getList(Map<String, Object> filters, int offset, int limit, String sort) {
         String jpql = getBaseListJpql(filters) + buildJpqlRestrictions(filters) + buildJpqlSort(sort);
 

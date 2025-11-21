@@ -18,8 +18,10 @@ package dev.nittenapps.stack.config.service;
 import dev.nittenapps.stack.config.domain.CatalogValue;
 import dev.nittenapps.stack.config.dto.CatalogValueDto;
 import dev.nittenapps.stack.data.service.DataService;
+import org.springframework.lang.NonNull;
 
 import java.util.UUID;
 
 public interface CatalogValueService extends DataService<CatalogValue, UUID, CatalogValueDto, CatalogValueDto> {
+    CatalogValueDto findByCatalogCodeAndCode(@NonNull String catalogCode, @NonNull String code);
 }
