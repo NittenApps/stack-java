@@ -18,6 +18,7 @@ package dev.nittenapps.stack.data.service;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.hibernate.query.Query;
 import org.hibernate.query.ResultListTransformer;
 import org.hibernate.query.TupleTransformer;
@@ -152,7 +153,9 @@ public abstract class AbstractDataService<E, ID, L, O> implements DataService<E,
             Object value = entry.getValue();
 
             if (value instanceof String) {
-                query.setParameter(key, getFilterValue(key, value.toString()));
+                if (!Strings.CS.equalsAny((String)value, "__NULL__", "__NOT_NULL__")) {
+                    query.setParameter(key, getFilterValue(key, value.toString()));
+                }
             } else if (value instanceof List<?>) {
                 query.setParameter(key, ((List<?>)value).stream().map(v -> getFilterValue(key, v.toString()))
                         .toList());
@@ -210,7 +213,13 @@ public abstract class AbstractDataService<E, ID, L, O> implements DataService<E,
         StringBuilder filter = new StringBuilder();
         filter.append(getFilterField(field)).append(" ");
         if (value instanceof String) {
-            filter.append(getFilterOperator(field)).append(" :").append(field);
+            if ("__NULL__".equals(value)) {
+                filter.append("IS NULL");
+            } else if ("__NOT_NULL__".equals(value)) {
+                filter.append("IS NOT NULL");
+            } else {
+                filter.append(getFilterOperator(field)).append(" :").append(field);
+            }
         } else if (value instanceof List<?>) {
             filter.append(" IN (:").append(field).append(") ");
         }
