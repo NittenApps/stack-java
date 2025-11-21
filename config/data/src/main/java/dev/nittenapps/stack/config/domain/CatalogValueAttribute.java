@@ -23,6 +23,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLOrder;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,7 @@ public class CatalogValueAttribute extends AbstractAttribute {
                              @JoinColumn(name = "code", referencedColumnName = "code")
                      })
     @SQLOrder("position")
+    @NotAudited
     private List<AttributeValue> values = new ArrayList<>();
 
     public CatalogValueAttribute(AttributeId id, CatalogValue catalogValue, String type) {

@@ -38,11 +38,6 @@ public class Catalogs extends AbstractActivity<Catalog, UUID, CatalogListDto, Ca
     }
 
     @Override
-    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
-        return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
-    }
-
-    @Override
     public ApiResponse<ObjectBody<?>> save(@NonNull Map<String, Object> body, @NonNull User user) {
         CatalogDto catalogDto = objectMapper.convertValue(body, CatalogDto.class);
         dataService.save(catalogDto);

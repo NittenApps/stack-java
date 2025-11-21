@@ -40,11 +40,6 @@ public class Fields extends AbstractActivity<Field, UUID, FieldListDto, FieldDto
     }
 
     @Override
-    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
-        return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
-    }
-
-    @Override
     public ApiResponse<ObjectBody<?>> save(@NonNull Map<String, Object> body, @NonNull User user) {
         FieldDto fieldDto = objectMapper.convertValue(body, FieldDto.class);
         dataService.save(fieldDto);

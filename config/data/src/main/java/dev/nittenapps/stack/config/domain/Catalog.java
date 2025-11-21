@@ -22,9 +22,7 @@ import org.hibernate.annotations.NaturalId;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "catalog")
@@ -53,7 +51,7 @@ public class Catalog extends AbstractSimpleId {
     @CollectionTable(name = "attribute", joinColumns = @JoinColumn(name = "catalog_id"))
     @OrderBy("position")
     @NotAudited
-    private List<CatalogAttribute> attributes = new ArrayList<>();
+    private Set<CatalogAttribute> attributes = new LinkedHashSet<>();
 
     @Override
     public boolean equals(Object o) {

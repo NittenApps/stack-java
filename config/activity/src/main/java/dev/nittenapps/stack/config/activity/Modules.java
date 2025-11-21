@@ -41,6 +41,7 @@ public class Modules extends AbstractActivity<Module, UUID, ModuleListDto, Modul
 
     public Modules(ModuleService moduleService, ActivityService activityService) {
         super(moduleService);
+
         this.activityService = activityService;
     }
 
@@ -48,11 +49,6 @@ public class Modules extends AbstractActivity<Module, UUID, ModuleListDto, Modul
     public ApiResponse<ListBody<ActivityListDto>> getActivities(@NonNull MultiValueMap<String, String> params,
                                                                 User user) {
         return new ApiResponse<>(new ListBody<>(activityService.getList(Map.of("active", true), 0, 0, "code")), null);
-    }
-
-    @Override
-    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
-        return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 
     @Override

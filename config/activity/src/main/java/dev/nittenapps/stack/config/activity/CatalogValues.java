@@ -50,11 +50,6 @@ public class CatalogValues extends AbstractActivity<Catalog, UUID, CatalogListDt
         this.catalogValueService = catalogValueService;
     }
 
-    @Override
-    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
-        return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
-    }
-
     @SuppressWarnings("unused")
     @Transactional(readOnly = true)
     public ApiResponse<ListBody<CatalogValueDto>> getValues(@NonNull MultiValueMap<String, String> params,

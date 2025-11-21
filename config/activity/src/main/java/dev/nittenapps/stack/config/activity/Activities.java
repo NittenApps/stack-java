@@ -51,11 +51,6 @@ public class Activities extends AbstractActivity<Activity, UUID, ActivityListDto
     }
 
     @Override
-    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
-        return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
-    }
-
-    @Override
     public ApiResponse<ObjectBody<?>> save(@NonNull Map<String, Object> body, @NonNull User user) {
         ActivityDto activityDto = objectMapper.convertValue(body, ActivityDto.class);
         activityDto.setType("XX");

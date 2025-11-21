@@ -43,6 +43,7 @@ public class FieldGroups extends AbstractActivity<FieldGroup, UUID, FieldGroupLi
 
     public FieldGroups(FieldService fieldService, FieldGroupService fieldGroupService) {
         super(fieldGroupService);
+
         this.fieldService = fieldService;
     }
 
@@ -51,11 +52,6 @@ public class FieldGroups extends AbstractActivity<FieldGroup, UUID, FieldGroupLi
                                                          User user) {
         return new ApiResponse<>(new ListBody<>(fieldService.getList(Map.of("type", "!LB", "active", true), 0, 0,
                 "code")), null);
-    }
-
-    @Override
-    public ApiResponse<ObjectBody<?>> getObject(@NonNull UUID id, User user) {
-        return new ApiResponse<>(new ObjectBody<>(dataService.getObject(id)), null);
     }
 
     @Override
