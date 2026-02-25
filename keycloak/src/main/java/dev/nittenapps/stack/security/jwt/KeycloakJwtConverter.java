@@ -16,6 +16,7 @@
 package dev.nittenapps.stack.security.jwt;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,8 +36,9 @@ public class KeycloakJwtConverter implements Converter<Jwt, KeycloakJwt> {
     }
 
     @Override
+    @Cacheable(value = "keycloakJwt", key = "#source.id")
     public KeycloakJwt convert(@NonNull Jwt source) {
-        log.trace("Converting {} to {}", source, KeycloakJwt.class);
+        log.trace("Converting {} to {}", source.getId(), KeycloakJwt.class);
         log.trace("Claims: {}", source.getClaims());
         Collection<GrantedAuthority> grantedAuthorities = extractAuthorities(source);
         var keycloakJwt = new KeycloakJwt(source, grantedAuthorities);
@@ -57,13 +59,22 @@ public class KeycloakJwtConverter implements Converter<Jwt, KeycloakJwt> {
         return claims;
     }
 
+    @NonNull
     private Collection<GrantedAuthority> extractAuthorities(@NonNull Jwt source) {
-        return Optional.ofNullable(source.getClaimAsMap("realm_access"))
+        Set<GrantedAuthority> authorities = new HashSet<>(Optional.ofNullable(source.getClaimAsMap("realm_access"))
                 .map(realmAccess -> realmAccess.get("roles"))
                 .filter(roles -> roles instanceof Collection<?>)
                 .map(roles -> ((Collection<?>)roles).stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .map(authority -> (GrantedAuthority)authority)
                         .collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+                .orElse(Collections.emptySet()));
+
+        authorities.addAll(Optional.ofNullable(source.getClaimAsStringList("groups"))
+                .map(groups -> groups.stream().map(group -> new SimpleGrantedAuthority("GROUP_" + group))
+                        .map(authority -> (GrantedAuthority)authority)
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet()));
+
+        return authorities;
     }
 }
