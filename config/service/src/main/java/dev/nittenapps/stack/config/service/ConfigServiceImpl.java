@@ -15,13 +15,13 @@
 
 package dev.nittenapps.stack.config.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.nittenapps.stack.config.domain.Catalog;
 import dev.nittenapps.stack.config.domain.CatalogValue;
 import dev.nittenapps.stack.config.dto.CatalogListDto;
 import dev.nittenapps.stack.config.dto.CatalogValueDto;
 import dev.nittenapps.stack.config.mapper.CatalogMapper;
 import dev.nittenapps.stack.config.mapper.CatalogValueMapper;
+import dev.nittenapps.stack.data.domain.AttributeValue;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.hibernate.query.Query;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +51,6 @@ public class ConfigServiceImpl implements ConfigService {
     private final CatalogValueMapper catalogValueMapper;
 
     private final EntityManager entityManager;
-
-    private final ObjectMapper objectMapper;
 
     @Override
     public Optional<Catalog> getCatalog(@NonNull String code) {
@@ -210,6 +209,22 @@ public class ConfigServiceImpl implements ConfigService {
         return query.getResultList().stream()
                 .map(catalogValueMapper::toFullDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Cacheable(value = "parameters", key = "#profile + ':' + #code")
+    public AttributeValue getParameterValue(@NonNull String profile, @NonNull String code) {
+        String jpql = """
+                SELECT cv
+                FROM CatalogValue cv LEFT JOIN FETCH cv.attributes cvas LEFT JOIN FETCH cvas.values
+                WHERE cv.catalog.code='__PARAMETERS__' AND cv.code=:profile AND KEY(cvas)=:code
+                """;
+        //noinspection unchecked
+        Query<CatalogValue> query = entityManager.createQuery(jpql)
+                .unwrap(Query.class)
+                .setParameter("code", code)
+                .setParameter("profile", profile);
+        return query.getResultList().getFirst().getAttributes().get(code).getValues().getFirst();
     }
 
     @Override

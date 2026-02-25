@@ -57,4 +57,13 @@ public class Controller {
     public ResponseEntity<ApiResponse<ListBody<CatalogListDto>>> catalogs() {
         return ResponseEntity.ok(new ApiResponse<>(new ListBody<>(configService.getCatalogs()), null));
     }
+
+    @GetMapping("/parameters/{paramCode}")
+    @Operation(summary = "Retrieves the parameter value")
+    public ResponseEntity<ApiResponse<ObjectBody<AttributeValueDto>>> parameter(@PathVariable String paramCode) {
+        AttributeValue value = configService.getParameterValue("__DEFAULT__", paramCode);
+        return ResponseEntity.ok(new ApiResponse<>(new ObjectBody<>(new AttributeValueDto(null, value.getCodeValue(),
+                value.getStringValue(), value.getNumberValue(), value.getDateValue(), value.getBooleanValue(),
+                value.getTextValue(), null)), null));
+    }
 }
