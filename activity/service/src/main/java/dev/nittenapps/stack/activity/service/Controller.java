@@ -58,14 +58,14 @@ public class Controller {
 
     @GetMapping("/{activity}/fieldGroups")
     @Operation(summary = "Returns the list of field groups in the activity")
-    public ResponseEntity<ApiResponse<? extends ListBody<?>>> fieldGroups(@PathVariable("activity") String activity) {
+    public ResponseEntity<ApiResponse<? extends ListBody<?>>> fieldGroups(@PathVariable String activity) {
         return ResponseEntity.ok(new ApiResponse<>(new ListBody<>(activityService.getFieldGroups(activity)), null));
     }
 
     @GetMapping("/{activity}/{method:[a-zA-Z]+}")
     @Operation(summary = "Executes a method in the activity")
-    public ResponseEntity<ApiResponse<? extends ApiBody>> get(@PathVariable("activity") String activity,
-                                                              @PathVariable("method") String method,
+    public ResponseEntity<ApiResponse<? extends ApiBody>> get(@PathVariable String activity,
+                                                              @PathVariable String method,
                                                               @RequestParam MultiValueMap<String, String> params) {
         User user = securityUtils.getUserDetails();
         log.debug("Get activity: {}, method: {}, params: {}, user: {}", activity, method, params, user);
@@ -107,18 +107,17 @@ public class Controller {
                        schema = @Schema(example = "attribute1=value1&attribute2=%value2%"))
     })
     public ResponseEntity<ApiResponse<? extends ListBody<?>>> list(
-            @PathVariable("activity") String activity,
+            @PathVariable String activity,
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, String> params) {
         log.debug("List activity: {}, params: {}", activity, params);
         Activity<Object, Object, Object, Object> _activity = getActivity(activity);
-        return ResponseEntity.ok(_activity.getList(params, null));
+        return ResponseEntity.ok(_activity.getList(params, securityUtils.getUserDetails()));
     }
 
-    @GetMapping(value = "/{activity}/{id:(?:[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}|[A-Z0-9_-]+)}")
+    @GetMapping(value = "/{activity}/{id:[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}|[A-Z0-9_-]+}")
     @Operation(summary = "Returns the specified task in the activity, by id")
-    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> objectById(
-            @PathVariable(name = "activity") String activity,
-            @PathVariable(name = "id") String id) {
+    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> objectById(@PathVariable String activity,
+                                                                           @PathVariable String id) {
         User user = securityUtils.getUserDetails();
         Activity<Object, Object, Object, Object> _activity = getActivity(activity);
         if (id.matches("[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}")) {
@@ -128,15 +127,15 @@ public class Controller {
     }
 
     @PostMapping("/{activity}/{method}")
-    public ResponseEntity<ApiResponse<? extends ApiBody>> post(@PathVariable("activity") String activity,
-                                                               @PathVariable("method") String method,
+    public ResponseEntity<ApiResponse<? extends ApiBody>> post(@PathVariable String activity,
+                                                               @PathVariable String method,
                                                                @RequestParam MultiValueMap<String, String> params,
                                                                @RequestBody Map<String, Object> body) {
-        User user = securityUtils.getUserDetails();
         Activity<Object, Object, Object, Object> _activity = getActivity(activity);
         try {
             Method _method = getMethod(_activity.getClass(), method, MultiValueMap.class, Map.class, User.class);
-            return ResponseEntity.ok((ApiResponse<? extends ApiBody>)_method.invoke(_activity, params, body, user));
+            return ResponseEntity.ok((ApiResponse<? extends ApiBody>)_method.invoke(_activity, params, body,
+                    securityUtils.getUserDetails()));
         } catch (NoSuchMethodException e) {
             throw new NoSuchElementException(e.getLocalizedMessage());
         } catch (IllegalAccessException e) {
@@ -155,11 +154,10 @@ public class Controller {
     }
 
     @PostMapping("/{activity}")
-    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> save(@PathVariable("activity") String activity,
+    public ResponseEntity<ApiResponse<? extends ObjectBody<?>>> save(@PathVariable String activity,
                                                                      @RequestBody Map<String, Object> body) {
-        User user = securityUtils.getUserDetails();
         Activity<Object, Object, Object, Object> _activity = getActivity(activity);
-        return ResponseEntity.ok(_activity.save(body, user));
+        return ResponseEntity.ok(_activity.save(body, securityUtils.getUserDetails()));
     }
 
     @NonNull
