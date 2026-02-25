@@ -20,6 +20,9 @@ import dev.nittenapps.stack.api.ListBody;
 import dev.nittenapps.stack.api.ObjectBody;
 import dev.nittenapps.stack.config.dto.CatalogListDto;
 import dev.nittenapps.stack.config.dto.CatalogValueDto;
+import dev.nittenapps.stack.config.mapper.CatalogValueMapper;
+import dev.nittenapps.stack.data.domain.AttributeValue;
+import dev.nittenapps.stack.data.dto.AttributeValueDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Tag(name = "Config", description = "Configuration operations")
 public class Controller {
+    private final CatalogValueMapper catalogValueMapper;
+
     private final ConfigService configService;
 
     @PostMapping("/catalog-values")
@@ -46,10 +51,18 @@ public class Controller {
     @GetMapping("/catalog-values/{catalogCode}")
     @Operation(summary = "Retrieves the catalog values")
     public ResponseEntity<ApiResponse<ListBody<CatalogValueDto>>> catalogValues(
-            @PathVariable("catalogCode") String catalogCode,
+            @PathVariable String catalogCode,
             @RequestParam MultiValueMap<String, String> params) {
         return ResponseEntity.ok(new ApiResponse<>(new ListBody<>(configService.getCatalogValues(catalogCode, params)),
                 null));
+    }
+
+    @GetMapping("/catalog-values/{catalogCode}/{code}")
+    @Operation(summary = "Retrieves the catalog values")
+    public ResponseEntity<ApiResponse<ObjectBody<CatalogValueDto>>> catalogValue(@PathVariable String catalogCode,
+                                                                                 @PathVariable String code) {
+        return ResponseEntity.ok(new ApiResponse<>(new ObjectBody<>(catalogValueMapper.toFullDto(configService
+                .getCatalogValue(catalogCode, code).orElse(null))), null));
     }
 
     @GetMapping("/catalogs")
