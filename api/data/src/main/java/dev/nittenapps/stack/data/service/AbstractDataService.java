@@ -149,7 +149,7 @@ public abstract class AbstractDataService<E, ID, L, O> implements DataService<E,
      */
     protected void bindParams(Query<?> query, @NonNull Map<String, Object> filters) {
         for (Map.Entry<String, Object> entry : filters.entrySet()) {
-            String key = entry.getKey();
+            String key = StringUtils.removeStart(entry.getKey(), '!');
             Object value = entry.getValue();
 
             if (value instanceof String) {
@@ -212,13 +212,13 @@ public abstract class AbstractDataService<E, ID, L, O> implements DataService<E,
     protected String getFilter(@NonNull String field, @NonNull Object value) {
         StringBuilder filter = new StringBuilder();
         filter.append(getFilterField(field)).append(" ");
-        if (value instanceof String) {
+        if (value instanceof String || value instanceof Number) {
             if ("__NULL__".equals(value)) {
                 filter.append("IS NULL");
             } else if ("__NOT_NULL__".equals(value)) {
                 filter.append("IS NOT NULL");
             } else {
-                filter.append(getFilterOperator(field)).append(" :").append(field);
+                filter.append(getFilterOperator(field)).append(" :").append(StringUtils.removeStart(field, '!'));
             }
         } else if (value instanceof List<?>) {
             filter.append(" IN (:").append(field).append(") ");
@@ -274,6 +274,9 @@ public abstract class AbstractDataService<E, ID, L, O> implements DataService<E,
      * @return An object representing the filter value.
      */
     protected Object getFilterValue(@NonNull String field, @NonNull String value) {
+        if ("id".equals(field)) {
+            return UUID.fromString(value);
+        }
         return value;
     }
 
