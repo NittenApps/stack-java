@@ -21,6 +21,8 @@ import jakarta.persistence.Lob;
 import lombok.*;
 import org.springframework.lang.NonNull;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -49,7 +51,17 @@ import java.util.Objects;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @ToString
-public class AttributeValue implements Comparable<AttributeValue> {
+public class AttributeValue implements Comparable<AttributeValue>, Serializable {
+    /**
+     * A unique identifier used to verify the compatibility of the class during the deserialization process.
+     * If the sender and receiver of a serialized object maintain different versions of the class, and their
+     * `serialVersionUID` values do not match, it will result in an {@code InvalidClassException}.
+     * <p>
+     * This field is automatically generated or manually maintained to explicitly define the version identity
+     * of the class, ensuring consistency across serialized forms.
+     */
+    @Serial private static final long serialVersionUID = 5832241179633535174L;
+
     /**
      * Represents the position of the attribute value within a collection or sequence, intended for ordering or sorting
      * purposes. This field is saved in the "position" column of the database table.
