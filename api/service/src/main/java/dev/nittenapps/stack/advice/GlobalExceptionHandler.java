@@ -16,6 +16,7 @@
 package dev.nittenapps.stack.advice;
 
 import dev.nittenapps.stack.api.ApiException;
+import jakarta.persistence.OptimisticLockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,12 +42,15 @@ import java.util.NoSuchElementException;
  * HTTP response entities with proper status codes and payloads for API consumers.
  * <p>
  * Exception handlers in this class cater to the following types of exceptions:
- * - {@link ApiException}: Custom exception handling to return meaningful error responses.
- * - {@link AuthorizationDeniedException}: Returns HTTP 403 FORBIDDEN for unauthorized access cases.
- * - {@link InvocationTargetException}: Handles invocation-related issues and translates the cause
- *   into a proper response.
- * - {@link NoSuchElementException}: Returns HTTP 404 NOT FOUND for requests targeting non-existent resources.
- * - {@link RuntimeException}: General runtime exception handling to ensure robust error processing.
+ * <ul>
+ * <li>{@link ApiException}: Custom exception handling to return meaningful error responses.</li>
+ * <li>{@link AuthorizationDeniedException}: Returns HTTP 403 FORBIDDEN for unauthorized access cases.</li>
+ * <li>{@link InvocationTargetException}: Handles invocation-related issues and translates the cause
+ * into a proper response.</li>
+ * <li>{@link NoSuchElementException}: Returns HTTP 404 NOT FOUND for requests targeting non-existent resources.</li>
+ * <li>{@link OptimisticLockException}: Returns HTTP 409 CONFLICT for optimistic locking conflicts.</li>
+ * <li>{@link RuntimeException}: General runtime exception handling to ensure robust error processing.</li>
+ * </ul>
  * <p>
  * Each exception handler logs the error details where applicable, and formats an error
  * response body using the {@link ErrorResponse} utility class.
@@ -57,7 +61,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Handles exceptions of type ApiException and returns a structured error response.
      *
-     * @param ex the ApiException instance caught during processing
+     * @param ex      the ApiException instance caught during processing
      * @param request the current web request instance
      * @return a ResponseEntity containing an ErrorResponse object with detailed error information
      */
@@ -79,11 +83,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * Handles exceptions of type AuthorizationDeniedException. This method is triggered when such an exception is
      * thrown, returning a response entity with the appropriate HTTP status code.
      *
-     * @param _ex the AuthorizationDeniedException instance that was thrown
+     * @param ignored the AuthorizationDeniedException instance that was thrown
      * @return a ResponseEntity object with a FORBIDDEN (403) HTTP status code and no body
      */
     @ExceptionHandler(AuthorizationDeniedException.class)
-    ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException _ex) {
+    ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ignored) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
@@ -91,31 +95,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * Handles InvocationTargetException thrown during method invocation and generates a meaningful response. Logs the
      * root cause of the exception and delegates handling based on the type of the underlying cause.
      *
-     * @param ex the InvocationTargetException thrown during method invocation
+     * @param ex      the InvocationTargetException thrown during method invocation
      * @param request the current web request during which the exception occurred
      * @return a ResponseEntity containing an ErrorResponse with details of the error, and an appropriate HTTP status
-     *         code
+     * code
      */
     @ExceptionHandler(InvocationTargetException.class)
     ResponseEntity<ErrorResponse> handleInvocationTargetException(@NonNull InvocationTargetException ex,
                                                                   @NonNull WebRequest request) {
         Throwable cause = ex.getCause();
         log.error(cause.getMessage(), cause);
-        if (cause instanceof ApiException apiException) {
-            return handleRuntimeException(apiException, request);
-        }
-        if (cause instanceof RuntimeException runtimeException) {
-            return handleRuntimeException(runtimeException, request);
-        }
-        return ResponseEntity.internalServerError()
-                .body(ErrorResponse.builder(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Error")
-                        .type(URI.create("http://localhost:8080/errors/internal-error"))
-                        .title("Internal Error")
-                        .instance(URI.create(request.getContextPath()))
-                        .detailMessageCode(cause.toString())
-                        .detail(cause.getMessage())
-                        .property("timestamp", Instant.now())
-                        .build());
+        return switch (cause) {
+            case ApiException apiException -> handleRuntimeException(apiException, request);
+            case OptimisticLockException optimisticLockException ->
+                    handleOptimisticLockException(optimisticLockException, request);
+            case RuntimeException runtimeException -> handleRuntimeException(runtimeException, request);
+            default -> ResponseEntity.internalServerError()
+                    .body(ErrorResponse.builder(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Error")
+                            .type(URI.create("http://localhost:8080/errors/internal-error"))
+                            .title("Internal Error")
+                            .instance(URI.create(request.getContextPath()))
+                            .detailMessageCode("ERR-000")
+                            .detail(cause.getMessage())
+                            .property("timestamp", Instant.now())
+                            .build());
+        };
     }
 
     /**
@@ -125,14 +129,39 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return a {@code ResponseEntity} with HTTP status {@code NOT_FOUND} and no body
      */
     @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ignored) {
+    ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
+        log.debug(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    /**
+     * Handles {@code OptimisticLockException} and returns a structured error response with HTTP status {@code CONFLICT}.
+     * This method is triggered when an optimistic locking conflict occurs, typically when one user attempts to update
+     * a record that has been modified by another user.
+     *
+     * @param ex      the OptimisticLockException that was thrown during processing
+     * @param request the current web request in which the exception occurred
+     * @return a ResponseEntity containing an ErrorResponse object with detailed error information,
+     * including the conflict details and an appropriate HTTP status code
+     */
+    @ExceptionHandler(OptimisticLockException.class)
+    ResponseEntity<ErrorResponse> handleOptimisticLockException(@NonNull OptimisticLockException ex,
+                                                                @NonNull WebRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.builder(ex, HttpStatus.CONFLICT, "Error")
+                        .type(URI.create("http://localhost:8080/errors/conflict"))
+                        .title("Conflict")
+                        .instance(URI.create(request.getContextPath()))
+                        .detailMessageCode("DB-000")
+                        .detail("Registro modificado por otro usuario, actualiza la información e intenta nuevamente.")
+                        .property("timestamp", Instant.now())
+                        .build());
     }
 
     /**
      * Handles RuntimeException and generates an appropriate error response.
      *
-     * @param ex the RuntimeException that was thrown
+     * @param ex      the RuntimeException that was thrown
      * @param request the current web request that triggered the exception
      * @return a ResponseEntity containing an ErrorResponse with detailed error information
      */
