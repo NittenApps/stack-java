@@ -70,7 +70,7 @@ public abstract class AbstractActivity<E, ID, L, O> implements Activity<E, ID, L
 
     public AbstractActivity(DataService<E, ID, L, O> dataService) {
         Class<?>[] classes = GenericTypeResolver.resolveTypeArguments(getClass(), AbstractActivity.class);
-        log.debug("classes: {}", (Object)classes);
+        log.trace("classes: {}", (Object)classes);
 
         //noinspection unchecked
         idClass = (Class<ID>)Objects.requireNonNull(classes)[1];
