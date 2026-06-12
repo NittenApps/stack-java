@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.coyote.BadRequestException;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeTypeException;
@@ -82,7 +83,7 @@ public class Controller {
         }
 
         StorageService storageService = this.storageService;
-        if (StringUtils.contains(path, ":")) {
+        if (Strings.CS.contains(path, ":")) {
             storageService = context.getBean(StringUtils.substringBefore(path, ":") + "Service", StorageService.class);
             path = StringUtils.substringAfter(path, ":");
         }
@@ -132,7 +133,7 @@ public class Controller {
         String filenameType = URLConnection.getFileNameMap().getContentTypeFor(filename);
         Tika tika = new Tika();
         String contentType = tika.detect(file.getInputStream());
-        if (!StringUtils.equals(contentType, filenameType)) {
+        if (!Strings.CI.equals(contentType, filenameType)) {
             log.warn("File content does not match the file name: {} != {}", contentType, filenameType);
             throw new BadRequestException("File content does not match the file name");
         }
