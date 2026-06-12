@@ -17,11 +17,11 @@ package dev.nittenapps.stack.config.service;
 
 import dev.nittenapps.stack.config.domain.Catalog;
 import dev.nittenapps.stack.config.domain.CatalogValue;
+import dev.nittenapps.stack.config.domain.CatalogValueAttributeValue;
 import dev.nittenapps.stack.config.dto.CatalogListDto;
 import dev.nittenapps.stack.config.dto.CatalogValueDto;
 import dev.nittenapps.stack.config.mapper.CatalogMapper;
 import dev.nittenapps.stack.config.mapper.CatalogValueMapper;
-import dev.nittenapps.stack.data.domain.AttributeValue;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -29,6 +29,7 @@ import jakarta.persistence.NonUniqueResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.Strings;
 import org.hibernate.query.Query;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
@@ -164,7 +165,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (MapUtils.isNotEmpty(filters)) {
             int i = 0;
             for (Map.Entry<String, List<String>> entry : filters.entrySet()) {
-                if ("term".equals(entry.getKey())) {
+                if (Strings.CS.equalsAny(entry.getKey(), "code", "term")) {
                     continue;
                 }
                 jpql.append(" INNER JOIN cv1.attributes cvas").append(i);
@@ -181,7 +182,10 @@ public class ConfigServiceImpl implements ConfigService {
         }
         jpql.append(" WHERE c.code=:catalogCode AND cv1.active)");
         if (filters.containsKey("term")) {
-            jpql.append((" WHERE LOWER(cv.code) LIKE :term OR LOWER(cv.name) LIKE :term"));
+            jpql.append((" AND LOWER(cv.code) LIKE :term OR LOWER(cv.name) LIKE :term"));
+        }
+        if (filters.containsKey("code")) {
+            jpql.append((" AND cv.code LIKE :code"));
         }
         jpql.append(" ORDER BY cv.code");
         log.trace(jpql.toString());
@@ -195,6 +199,10 @@ public class ConfigServiceImpl implements ConfigService {
             for (Map.Entry<String, List<String>> entry : filters.entrySet()) {
                 if ("term".equals(entry.getKey())) {
                     query.setParameter("term", entry.getValue().getFirst());
+                    continue;
+                }
+                if ("code".equals(entry.getKey())) {
+                    query.setParameter("code", entry.getValue().getFirst());
                     continue;
                 }
                 query.setParameter(entry.getKey(), entry.getKey());
@@ -213,7 +221,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     @Cacheable(value = "parameters", key = "#profile + ':' + #code")
-    public AttributeValue getParameterValue(@NonNull String profile, @NonNull String code) {
+    public CatalogValueAttributeValue getParameterValue(@NonNull String profile, @NonNull String code) {
         String jpql = """
                 SELECT cv
                 FROM CatalogValue cv LEFT JOIN FETCH cv.attributes cvas LEFT JOIN FETCH cvas.values
@@ -224,7 +232,8 @@ public class ConfigServiceImpl implements ConfigService {
                 .unwrap(Query.class)
                 .setParameter("code", code)
                 .setParameter("profile", profile);
-        return query.getResultList().getFirst().getAttributes().get(code).getValues().getFirst();
+        return query.getResultList().getFirst().getAttributes().get(code)
+                .getValues().stream().findFirst().orElse(null);
     }
 
     @Override

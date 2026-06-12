@@ -18,26 +18,26 @@ package dev.nittenapps.stack.config.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.nittenapps.stack.data.domain.AbstractAttribute;
 import dev.nittenapps.stack.data.domain.AttributeId;
-import dev.nittenapps.stack.data.domain.AttributeValue;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.SQLOrder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "value_attribute")
 @Audited
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
-@ToString(callSuper = true)
-public class CatalogValueAttribute extends AbstractAttribute {
+@NoArgsConstructor
+@ToString(callSuper = true, doNotUseGetters = true)
+public class CatalogValueAttribute extends AbstractAttribute<CatalogValueAttributeValue> {
     @EmbeddedId
     @AttributeOverride(name = "parentId", column = @Column(name = "value_id"))
-    private AttributeId id;
+    private AttributeId id = new AttributeId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("parentId")
@@ -45,24 +45,18 @@ public class CatalogValueAttribute extends AbstractAttribute {
     @JsonIgnore @ToString.Exclude
     private CatalogValue catalogValue;
 
-    @ElementCollection
-    @CollectionTable(name = "value_attribute_value",
-                     joinColumns = {
-                             @JoinColumn(name = "value_id", referencedColumnName = "value_id"),
-                             @JoinColumn(name = "code", referencedColumnName = "code")
-                     })
-    @SQLOrder("position")
-    @NotAudited
-    private List<AttributeValue> values = new ArrayList<>();
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore @ToString.Exclude
+    private Set<CatalogValueAttributeValue> values = new HashSet<>();
 
-    public CatalogValueAttribute(AttributeId id, CatalogValue catalogValue, String type) {
-        super(type);
+    public CatalogValueAttribute(AttributeId id, String type) {
+        super(id, type);
+
         this.id = id;
-        this.catalogValue = catalogValue;
     }
 
     @Override
     public void setParent(Object parent) {
-        setCatalogValue((CatalogValue)parent);
+        this.catalogValue = (CatalogValue)parent;
     }
 }

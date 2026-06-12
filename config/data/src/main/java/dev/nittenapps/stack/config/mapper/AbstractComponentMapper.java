@@ -70,8 +70,10 @@ public abstract class AbstractComponentMapper<E extends Component, L extends Com
     }
 
     public AbstractComponentMapper() {
-        log.debug("classes: {}", (Object)GenericTypeResolver.resolveTypeArguments(getClass(),
-                AbstractComponentMapper.class));
+        if (log.isTraceEnabled()) {
+            log.trace("classes: {}", (Object)GenericTypeResolver.resolveTypeArguments(getClass(),
+                    AbstractComponentMapper.class));
+        }
         //noinspection unchecked
         entityClass = (Class<E>)Objects.requireNonNull(GenericTypeResolver.resolveTypeArguments(getClass(),
                 AbstractComponentMapper.class))[0];

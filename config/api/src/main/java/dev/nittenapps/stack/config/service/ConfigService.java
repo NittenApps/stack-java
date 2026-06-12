@@ -17,9 +17,9 @@ package dev.nittenapps.stack.config.service;
 
 import dev.nittenapps.stack.config.domain.Catalog;
 import dev.nittenapps.stack.config.domain.CatalogValue;
+import dev.nittenapps.stack.config.domain.CatalogValueAttributeValue;
 import dev.nittenapps.stack.config.dto.CatalogListDto;
 import dev.nittenapps.stack.config.dto.CatalogValueDto;
-import dev.nittenapps.stack.data.domain.AttributeValue;
 import org.springframework.lang.NonNull;
 import org.springframework.util.MultiValueMap;
 
@@ -43,7 +43,7 @@ public interface ConfigService {
 
     List<CatalogValueDto> getCatalogValues(@NonNull String catalogCode, MultiValueMap<String, String> filters);
 
-    AttributeValue getParameterValue(String profile, @NonNull String code);
+    CatalogValueAttributeValue getParameterValue(String profile, @NonNull String code);
 
     Catalog saveCatalog(@NonNull Catalog catalog);
 

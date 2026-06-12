@@ -48,10 +48,8 @@ public class FieldGroups extends AbstractActivity<FieldGroup, UUID, FieldGroupLi
     }
 
     @SuppressWarnings("unused")
-    public ApiResponse<ListBody<FieldListDto>> getFields(@NonNull MultiValueMap<String, String> params,
-                                                         User user) {
-        return new ApiResponse<>(new ListBody<>(fieldService.getList(Map.of("type", "!LB", "active", true), 0, 0,
-                "code")), null);
+    public ApiResponse<ListBody<FieldListDto>> getFields(@NonNull MultiValueMap<String, String> params, User user) {
+        return new ApiResponse<>(new ListBody<>(fieldService.getList(Map.of("active", true), 0, 0, "code")), null);
     }
 
     @Override

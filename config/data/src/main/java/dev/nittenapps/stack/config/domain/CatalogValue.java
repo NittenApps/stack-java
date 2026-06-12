@@ -21,9 +21,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +32,7 @@ import java.util.Objects;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @ToString(callSuper = true)
-public class CatalogValue extends WithAttributes<CatalogValueAttribute> {
+public class CatalogValue extends WithAttributes<CatalogValueAttribute, CatalogValueAttributeValue> {
     @NaturalId
     @ManyToOne(optional = false)
     @JsonIgnore @ToString.Exclude
