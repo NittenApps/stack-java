@@ -48,16 +48,15 @@ import java.util.UUID;
 @Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@ToString
+@ToString(doNotUseGetters = true)
 public class AttributeId implements Serializable {
     @Serial private static final long serialVersionUID = -8514495177317414261L;
 
     /**
-     * Represents the unique identifier of a parent entity in a composite primary key structure. The field is mapped to
-     * the "parent_id" column in the database and cannot be null. It is used to establish a relationship with the parent
-     * entity, ensuring unique identification within the scope of the composite key.
+     * Represents the identifier of the parent entity to which this entity is associated. This field is mandatory and
+     * cannot be null. It is used to maintain the relationship or hierarchical structure between entities.
      */
-    @Column(name = "parent_id", nullable = false)
+    @Column(nullable = false)
     private UUID parentId;
 
     /**

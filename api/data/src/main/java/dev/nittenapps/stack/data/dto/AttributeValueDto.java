@@ -19,19 +19,22 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 /**
  * Represents the value of an attribute which can hold various types of data. This object is used in contexts where
  * attributes and their respective values are dynamically handled.
  * <p>
- * The class supports multiple data types for attribute values including:
- * - String
- * - Numeric
- * - Boolean
- * - Date/Time
- * - Text
- * - Catalog references
+ * The class supports multiple data types for attribute values, including:
+ * <ul>
+ *   <li>String</li>
+ *   <li>Numeric</li>
+ *   <li>Boolean</li>
+ *   <li>Date/Time</li>
+ *   <li>Text</li>
+ *   <li>Catalog references</li>
+ * </ul>
  * <p>
  * It also includes an inner static class, CatalogValue, which represents catalog-based information with a code and
  * name.
@@ -46,7 +49,7 @@ public class AttributeValueDto implements Serializable {
     @EqualsAndHashCode.Include private Integer position;
     private String codeValue;
     private String stringValue;
-    private Double numberValue;
+    private BigDecimal numberValue;
     private ZonedDateTime dateValue;
     private Boolean booleanValue;
     private String textValue;

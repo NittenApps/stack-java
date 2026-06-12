@@ -17,6 +17,7 @@ package dev.nittenapps.stack.data.mapper;
 
 import dev.nittenapps.stack.data.dto.ListDto;
 import dev.nittenapps.stack.data.dto.ObjectDto;
+import org.mapstruct.MappingTarget;
 
 import java.io.Serializable;
 
@@ -64,4 +65,12 @@ public interface DataMapper<E, ID extends Serializable, L extends ListDto<ID>, O
      * @return the list-based DTO representation of the provided entity, of type {@code L}.
      */
     L toListDto(E entity);
+
+    /**
+     * Updates the values of an existing entity using the data provided in the given Data Transfer Object (DTO).
+     *
+     * @param dto    the Data Transfer Object (DTO) that contains updated values. Must not be null.
+     * @param entity the entity object to be updated with the values from the DTO. Must not be null.
+     */
+    void updateFromDto(O dto, @MappingTarget E entity);
 }

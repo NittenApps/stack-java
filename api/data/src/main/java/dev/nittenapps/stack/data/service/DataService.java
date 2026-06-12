@@ -20,6 +20,7 @@ import org.springframework.lang.NonNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The DataService interface serves as a base contract for CRUD operations on a data layer, providing generic methods
@@ -52,6 +53,17 @@ public interface DataService<E, ID, L, O> {
     E findById(@NonNull ID id);
 
     /**
+     * Retrieves an entity based on its unique identifier by wrapping the result in an {@link Optional}.
+     *
+     * @param id The unique identifier of the entity to be retrieved. Must not be null.
+     * @return An {@link Optional} containing the entity of type {@code E} if it exists, or an empty {@link Optional}
+     * if no entity is found.
+     */
+    default Optional<E> getEntity(@NonNull ID id) {
+        throw new NotImplementedException();
+    }
+
+    /**
      * Retrieves a list of items that match the given filters, with support for pagination and sorting.
      *
      * @param filters A map of filter criteria used to constrain the query. Keys represent attribute names, and values
@@ -67,11 +79,20 @@ public interface DataService<E, ID, L, O> {
     }
 
     /**
+     * Retrieves a reference to an entity identified by its unique identifier. The returned reference is typically a
+     * proxy that may not immediately fetch the entity's state.
+     *
+     * @param id The unique identifier of the entity for which the reference is to be retrieved. Must not be null.
+     * @return A reference to the entity of type E associated with the provided identifier.
+     */
+    E getReference(@NonNull ID id);
+
+    /**
      * Retrieves an object DTO associated with the given identifier.
      *
      * @param id The unique identifier of the object to be retrieved. Must not be null.
      * @return The object DTO of type O corresponding to the provided identifier. If no object is found, the
-     *         implementation may throw an exception or return null.
+     * implementation may throw an exception or return null.
      */
     default O getObject(@NonNull ID id) {
         throw new NotImplementedException();

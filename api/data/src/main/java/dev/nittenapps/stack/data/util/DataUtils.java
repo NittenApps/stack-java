@@ -16,7 +16,7 @@
 package dev.nittenapps.stack.data.util;
 
 import dev.nittenapps.stack.data.domain.AbstractAttribute;
-import dev.nittenapps.stack.data.domain.AttributeValue;
+import dev.nittenapps.stack.data.domain.AbstractAttributeValue;
 import dev.nittenapps.stack.data.domain.WithAttributes;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +45,7 @@ public class DataUtils {
      *               "pageSize". If "page" is missing or invalid, it defaults to 0. If "pageSize" is missing or invalid,
      *               it defaults to 0.
      * @return a {@code Pageable} object representing the specified page and page size. If "pageSize" is not greater
-     *         than 0, returns an unpaged {@code Pageable}.
+     * than 0, returns an unpaged {@code Pageable}.
      */
     @NonNull
     public static Pageable buildPageable(@NonNull MultiValueMap<String, String> params) {
@@ -67,7 +67,7 @@ public class DataUtils {
      *               should be a comma-separated list of field names optionally followed by "desc" to indicate
      *               descending order.
      * @return a {@code Sort} object representing the sorting criteria specified in the "sort" parameter. If the
-     *         parameter is empty or invalid, returns {@code Sort.unsorted()}.
+     * parameter is empty or invalid, returns {@code Sort.unsorted()}.
      */
     @NonNull
     public static Sort buildSort(@NonNull MultiValueMap<String, String> params) {
@@ -92,11 +92,12 @@ public class DataUtils {
      * attempts to fetch the attribute by its code, extract its values, and return the first value, if available.
      *
      * @param withAttributes the instance containing a collection of attributes
-     * @param code the code of the attribute whose value is to be retrieved
+     * @param code           the code of the attribute whose value is to be retrieved
      * @return an {@code Optional} containing the first value of the attribute with the specified code, or an empty
-     *         {@code Optional} if no value is found
+     * {@code Optional} if no value is found
      */
-    public static Optional<AttributeValue> getValue(@NonNull WithAttributes<?> withAttributes, @NonNull String code) {
+    public static Optional<AbstractAttributeValue<?>> getValue(@NonNull WithAttributes<?, ?> withAttributes,
+                                                               @NonNull String code) {
         return Optional.ofNullable(withAttributes.getAttributes())
                 .map(attributes -> attributes.get(code))
                 .map(AbstractAttribute::getValues)

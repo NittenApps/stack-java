@@ -16,19 +16,21 @@
 package dev.nittenapps.stack.data.mapper;
 
 import dev.nittenapps.stack.data.domain.AbstractAttribute;
-import dev.nittenapps.stack.data.domain.AttributeValue;
+import dev.nittenapps.stack.data.domain.AbstractAttributeValue;
 import dev.nittenapps.stack.data.domain.WithAttributes;
 import dev.nittenapps.stack.data.dto.AttributeValueDto;
 import dev.nittenapps.stack.data.dto.WithAttributesDto;
-import io.micrometer.common.util.StringUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.mapstruct.AfterMapping;
+import dev.nittenapps.stack.util.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.BeforeMapping;
-import org.mapstruct.MappingTarget;
-import org.springframework.lang.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -37,96 +39,54 @@ import java.util.stream.Collectors;
  * a consistent and reusable manner.
  * <p>
  * This class includes functionality for:
- * - Mapping attributes from domain objects to DTOs and vice versa.
- * - Linking attributes to their parent objects after the mapping process.
- * - Resolving attributes by their unique codes using an abstract method.
- * - Preparing the parent ID before mapping via lifecycle hooks.
+ * <ul>
+ *   <li>Mapping attributes from domain objects to DTOs and vice versa.</li>
+ *   <li>Linking attributes to their parent objects after the mapping process.</li>
+ *   <li>Resolving attributes by their unique codes using an abstract method.</li>
+ *   <li>Preparing the parent ID before mapping via lifecycle hooks.</li>
+ * </ul>
  * <p>
  * The class is designed to be extended by concrete implementations that specify the type of entities, attributes, and
  * their DTO representations.
  * <p>
  * Generic Parameters:
- * - T: A type parameter that extends {@link WithAttributes} to represent domain entities that manage collections of
- * attributes.
- * - A: A type parameter that extends {@link AbstractAttribute} to represent the attributes associated with the
- * entities.
- * - D: A type parameter that extends {@link WithAttributesDto} to represent the DTOs for the entities.
+ * <ul>
+ *   <li><code>T</code>: A type parameter that extends {@link WithAttributes} to represent domain entities that manage
+ *   collections of attributes.</li>
+ *   <li><code>A</code>: A type parameter that extends {@link AbstractAttribute} to represent the attributes associated
+ *   with the entities.</li>
+ *   <li><code>D</code>: A type parameter that extends {@link WithAttributesDto} to represent the DTOs for the
+ *   entities.</li>
+ * </ul>
  * <p>
  * Key Features:
- * - `mapAttributesDto`: Converts a map of attributes from a domain entity to a map of DTO-compatible structures.
- * - `mapAttributes`: Converts a map of DTO-compatible structures to a map of attributes for a domain entity.
- * - Lifecycle hooks (`@BeforeMapping`, `@AfterMapping`) for preparing and finalizing the attribute conversion process.
- * - Abstract methods for resolving attributes by key, ensuring flexibility for concrete implementations.
+ * <ul>
+ *   <li><code>mapAttributesDto</code>: Converts a map of attributes from a domain entity to a map of DTO-compatible
+ *   structures.</li>
+ *   <li><code>mapAttributes</code>: Converts a map of DTO-compatible structures to a map of attributes for a domain
+ *   entity.</li>
+ *   <li>Lifecycle hooks (`@BeforeMapping`, `@AfterMapping`) for preparing and finalizing the attribute conversion
+ *   process.</li>
+ *   <li>Abstract methods for resolving attributes by key, ensuring flexibility for concrete implementations.</li>
+ * </ul>
  */
-public abstract class AbstractAttributesMapper<T extends WithAttributes<A>, A extends AbstractAttribute,
-        D extends WithAttributesDto> {
+@Slf4j
+public abstract class AbstractAttributesMapper<T extends WithAttributes<A, V>, A extends AbstractAttribute<V>,
+        V extends AbstractAttributeValue<A>, D extends WithAttributesDto> {
     protected UUID parentId;
 
-    /**
-     * Converts a map of attributes to a map of attribute DTOs, where the values are transformed into a structure
-     * suitable for external data representation (AttributeValueDto). Each value in the input map is mapped to a list of
-     * {@code AttributeValueDto}, ensuring the appropriate type conversion.
-     *
-     * @param attributes a map containing attributes with their corresponding values. Each value
-     *                   is expected to provide a list of attribute values.
-     * @return a map with the same keys as the input, but the values are lists of AttributeValueDto representing the
-     * converted attribute values. Returns null if the input map is empty or null.
-     */
-    protected Map<String, List<AttributeValueDto>> mapAttributesDto(Map<String, A> attributes) {
-        if (MapUtils.isEmpty(attributes)) {
-            return null;
-        }
+    private MapperUtils mapperUtils;
 
-        return attributes.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        entry -> new ArrayList<>(new LinkedHashSet<>(entry.getValue().getValues().stream()
-                                .map(value -> new AttributeValueDto(value.getPosition(), value.getCodeValue(),
-                                        value.getStringValue(), value.getNumberValue(), value.getDateValue(),
-                                        value.getBooleanValue(), value.getTextValue(),
-                                        StringUtils.isBlank(value.getCodeValue()) ? null
-                                                : new AttributeValueDto.CatalogValue(value.getCodeValue(),
-                                                        value.getStringValue())))
-                                .toList()))));
+    private SecurityUtils securityUtils;
+
+    @Autowired
+    protected final void setMapperUtils(MapperUtils mapperUtils) {
+        this.mapperUtils = mapperUtils;
     }
 
-    /**
-     * Maps a given input map of attribute keys and their corresponding list of {@code AttributeValueDto} instances to a
-     * new map. The output map keys remain the same, but the values are transformed into attribute objects of type
-     * {@code A}, populated with their respective transformed values.
-     * <p>
-     * Each {@code AttributeValueDto} is converted into an {@code AttributeValue} and added to the respective
-     * attribute's value set. The transformation includes resolving catalog references where applicable and assigning an
-     * ordinal index to each value.
-     *
-     * @param attributes a map where keys are attribute identifiers (as {@code String}), and the values are lists of
-     *                   attribute value DTOs ({@code AttributeValueDto}) to be transformed and mapped.
-     * @return a map where keys are attribute identifiers (as {@code String}), and values are transformed attributes of
-     * type {@code A} with their respective value sets populated. Returns {@code null} if the input map is
-     * {@code null} or empty.
-     */
-    protected Map<String, A> mapAttributes(Map<String, List<AttributeValueDto>> attributes) {
-        if (MapUtils.isEmpty(attributes)) {
-            return null;
-        }
-
-        AtomicInteger position = new AtomicInteger(0);
-        return attributes.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        entry -> {
-                            A attribute = resolveAttribute(entry.getKey());
-                            position.set(0);
-                            attribute.getValues().clear();
-                            attribute.getValues().addAll(entry.getValue()
-                                    .stream().map(value -> new AttributeValue(position.getAndIncrement(),
-                                            value.getCatalogValue() == null ? value.getCodeValue()
-                                                    : value.getCatalogValue().code,
-                                            value.getCatalogValue() == null ? value.getStringValue()
-                                                    : value.getCatalogValue().name,
-                                            value.getNumberValue(), value.getDateValue(), value.getBooleanValue(),
-                                            value.getTextValue()))
-                                    .toList());
-                            return attribute;
-                        }));
+    @Autowired
+    protected final void setSecurityUtils(SecurityUtils securityUtils) {
+        this.securityUtils = securityUtils;
     }
 
     /**
@@ -146,33 +106,134 @@ public abstract class AbstractAttributesMapper<T extends WithAttributes<A>, A ex
     }
 
     /**
-     * Establishes bidirectional linking between a target object and its attributes. This method ensures that each
-     * attribute within the target's attribute map is linked back to the parent object and sets its parent identifier.
+     * Synchronizes the attributes by aligning values from the source DTO with the existing attributes. It ensures that
+     * new attributes are added, existing ones are updated, and obsolete ones are removed.
      *
-     * @param target the target object containing a map of attributes to be linked. Must not be null. If the attribute
-     *               map is null, the method exits without action.
+     * @param attributesDto         the map of attribute keys to a list of {@code AttributeValueDto} representing the
+     *                              source data. If null, the method exits without making changes.
+     * @param existingAttributes    the map of existing attributes where the key is the attribute identifier and the
+     *                              value is the corresponding attribute object. This map is updated in place.
+     * @param attributeFactory      a supplier for creating new attribute instances when needed.
+     * @param attributeValueFactory a supplier for creating new attribute value instances when needed.
+     * @param attributeValueBinder  a function that binds an attribute with an attribute value.
      */
-    @AfterMapping
-    protected void linkAttributes(@MappingTarget T target) {
-        if (target == null || target.getAttributes() == null) {
+    protected void syncAttributes(Map<String, List<AttributeValueDto>> attributesDto, Map<String, A> existingAttributes,
+                                  Supplier<A> attributeFactory, Supplier<V> attributeValueFactory,
+                                  BiConsumer<A, V> attributeValueBinder) {
+        if (attributesDto == null) {
             return;
         }
 
-        target.getAttributes().values().forEach(attribute -> {
-            assert attribute.getId() != null;
-            attribute.getId().setParentId(target.getId());
-            attribute.setParent(target);
-        });
+        Set<String> logbookFields = mapperUtils.getLogBookFields();
+        ZonedDateTime now = ZonedDateTime.now();
+        String username = securityUtils.getUsername();
+        String userFullName = securityUtils.getFullName();
+
+        existingAttributes.keySet().removeIf(key -> !attributesDto.containsKey(key));
+
+        for (Map.Entry<String, List<AttributeValueDto>> entry : attributesDto.entrySet()) {
+            String key = entry.getKey();
+            List<AttributeValueDto> valueDtos = entry.getValue();
+            if (CollectionUtils.isEmpty(valueDtos)) {
+                if (existingAttributes.containsKey(key)) {
+                    valueDtos = new ArrayList<>();
+                } else {
+                    continue;
+                }
+            }
+
+            A attribute = existingAttributes.get(key);
+            if (attribute == null) {
+                attribute = attributeFactory.get();
+                attribute.getId().setCode(key);
+                attribute.setType("XX");
+                existingAttributes.put(key, attribute);
+            }
+
+            Set<V> currentValues = attribute.getValues();
+            if (currentValues == null) {
+                currentValues = new HashSet<>();
+            }
+            int incomingSize = valueDtos.size();
+            currentValues.removeIf(value -> value.getId().getPosition() >= incomingSize);
+
+            Map<Integer, V> lookupMap = currentValues.stream()
+                    .collect(Collectors.toMap(value -> value.getId().getPosition(), value -> value));
+
+            currentValues.clear();
+
+            for (int i = 0; i < valueDtos.size(); i++) {
+                AttributeValueDto dto = valueDtos.get(i);
+                V value;
+
+                if (lookupMap.containsKey(i)) {
+                    value = lookupMap.get(i);
+                } else {
+                    value = attributeValueFactory.get();
+                    value.getId().setPosition(i);
+                }
+
+                if (logbookFields.contains(key) && dto.getDateValue() == null) {
+                    dto.setCodeValue(username);
+                    dto.setStringValue(userFullName);
+                    dto.setDateValue(now);
+                }
+
+                value.setBooleanValue(dto.getBooleanValue());
+                value.setCodeValue(dto.getCodeValue());
+                value.setDateValue(dto.getDateValue());
+                value.setNumberValue(dto.getNumberValue());
+                value.setStringValue(dto.getStringValue());
+                value.setTextValue(dto.getTextValue());
+                if (dto.getCatalogValue() != null) {
+                    value.setCodeValue(dto.getCatalogValue().code);
+                    value.setStringValue(dto.getCatalogValue().name);
+                }
+                attributeValueBinder.accept(attribute, value);
+                attribute.addValue(value);
+            }
+        }
     }
 
     /**
-     * Resolves and retrieves an attribute instance of type {@code A} based on its unique code. This method is intended
-     * to be used for mapping or processing attributes by their identifying codes in implementations of the abstract
-     * class.
+     * Converts a map of attributes to a map of attribute data transfer objects (DTOs). This method processes the
+     * provided attributes, extracts their values, sorts them by position, and maps them to their corresponding DTO
+     * representations.
      *
-     * @param code the unique identifier for the attribute to be resolved. Must not be null.
-     * @return the resolved attribute instance of type {@code A}. Never null.
+     * @param attributes a map where the key is the attribute's identifier and the value is the attribute object
+     *                   containing its values. If the map is null, an empty map is returned.
+     * @return a map where the key is the attribute's identifier and the value is a list of {@code AttributeValueDto}
+     * objects representing the attribute's values. If the input map is null, an empty map is returned.
      */
-    @NonNull
-    protected abstract A resolveAttribute(@NonNull String code);
+    protected Map<String, List<AttributeValueDto>> toAttributesDto(Map<String, A> attributes) {
+        if (attributes == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, List<AttributeValueDto>> dtoMap = new HashMap<>();
+        for (Map.Entry<String, A> entry : attributes.entrySet()) {
+            String key = entry.getKey();
+            A attribute = entry.getValue();
+
+            dtoMap.put(key, attribute.getValues().stream()
+                    .sorted(Comparator.comparingInt(v -> v.getId().getPosition()))
+                    .map(value -> {
+                        AttributeValueDto dto = new AttributeValueDto();
+                        dto.setBooleanValue(value.getBooleanValue());
+                        dto.setCodeValue(value.getCodeValue());
+                        dto.setDateValue(value.getDateValue());
+                        dto.setNumberValue(value.getNumberValue());
+                        dto.setStringValue(value.getStringValue());
+                        dto.setTextValue(value.getTextValue());
+                        if (StringUtils.isNotBlank(value.getCodeValue())) {
+                            dto.setCatalogValue(
+                                    new AttributeValueDto.CatalogValue(value.getCodeValue(), value.getStringValue()));
+                        }
+                        return dto;
+                    })
+                    .collect(Collectors.toList()));
+        }
+
+        return dtoMap;
+    }
 }

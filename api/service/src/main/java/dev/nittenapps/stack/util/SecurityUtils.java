@@ -25,10 +25,17 @@ import java.util.Map;
  */
 public interface SecurityUtils {
     /**
+     * Retrieves the full name of the currently authenticated user.
+     *
+     * @return the full name of the authenticated user
+     */
+    String getFullName();
+
+    /**
      * Retrieves a map of user claims associated with the currently authenticated user.
      *
-     * @return a map containing the claims of the authenticated user, where the keys are claim names and  the values are
-     *         the corresponding claim values
+     * @return a map containing the claims of the authenticated user, where the keys are claim names and the values are
+     * the corresponding claim values
      */
     Map<String, Object> getUserClaims();
 

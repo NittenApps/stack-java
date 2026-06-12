@@ -123,6 +123,20 @@ public abstract class AbstractDataService<E, ID, L, O> implements DataService<E,
     }
 
     /**
+     * Retrieves a reference to an entity using its unique identifier without initializing it. This method returns a
+     * proxy object for the entity, which may not contain the actual data until an interaction triggers the entity to be
+     * fetched from the database.
+     *
+     * @param id The unique identifier of the entity to be referenced. Must not be null.
+     * @return A proxy of the entity corresponding to the provided identifier. The proxy may throw an exception if the
+     * entity does not exist or is not available.
+     */
+    @Override
+    public E getReference(@NonNull ID id) {
+        return entityManager.getReference(entityClass, id);
+    }
+
+    /**
      * Builds a JPQL "ORDER BY" clause based on the provided sorting criteria.
      *
      * @param sort A comma-separated string representing sorting criteria. Each criterion can specify a field name
